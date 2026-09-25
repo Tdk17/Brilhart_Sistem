@@ -55,7 +55,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   children: [
                     Text('Dashboard', style: TextStyle(fontSize: 30, fontWeight: FontWeight.w800)),
                     SizedBox(height: 6),
-                    Text('Visão operacional e comercial da BrilhArte.', style: TextStyle(color: AppColors.silverDark)),
+                    Text('Visão operacional e comercial da Brilhart.', style: TextStyle(color: AppColors.silverDark)),
                   ],
                 ),
               ),
