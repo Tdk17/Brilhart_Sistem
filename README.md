@@ -1,34 +1,71 @@
 # BrilhArte Sistem
 
-Sistema interno **Web/PWA** da BrilhArte Laqueamentos, construído em Flutter Web seguindo o padrão dos projetos CormeX: `get_it`, `go_router`, `signals`, integração real com backend via Parse/Back4App e sem dados mockados.
+Sistema interno **Web/PWA** da BrilhArte Laqueamentos, construído em Flutter Web seguindo o padrão dos projetos CormeX: `get_it`, `go_router`, `signals`, integração real com Parse/Back4App e sem dados mockados.
+
+## Acesso Web
+
+Quando o workflow de deploy estiver concluído, o sistema fica em:
+
+`https://tdk17.github.io/Brilhart_Sistem/`
+
+Solicitação pública de orçamento:
+
+`https://tdk17.github.io/Brilhart_Sistem/#/solicitar-orcamento`
 
 ## Módulos
 
-- Login sem cadastro público e sessão persistente
+- Login interno por e-mail/senha, sem cadastro público
+- Sessão persistente e rotas protegidas
 - Dashboard operacional e comercial
-- Clientes
-- Solicitações de orçamento originadas pelo site
-- Orçamentos oficiais com PDF A4
-- Conversão de orçamento em serviço
-- Produção/serviços e controle de atrasos
-- Faturamento
+- Clientes: cadastro, edição, busca, exclusão conforme regra e histórico
+- Solicitações de orçamento originadas pelo site, com fotos e origem preservada
+- Conversão solicitação -> cliente/orçamento
+- Orçamentos oficiais e contrato de PDF A4
+- Conversão orçamento aprovado -> serviço
+- Produção/serviços, prazos, atrasos e conclusão
+- Faturamento e métricas por origem
 - Contratos
 - Notas/documentos de fechamento
 - Central de documentos
-- Compartilhamento por WhatsApp
+- Fluxo de contato/compartilhamento por WhatsApp
 - Configurações da empresa
-- Formulário público de solicitação de orçamento
 - PWA instalável e responsiva
 
-## Tema
+## Identidade visual
 
-Identidade visual preta, prata e dourada. A logo oficial da BrilhArte está em `assets/images/brilhart_logo.png` e é usada no login, navegação, PWA e documentos.
+Tema corporativo **preto, prata e dourado**. A logo oficial da BrilhArte está em `assets/images/brilhart_logo.png` e também foi preparada para favicon e ícones da PWA.
 
-## Backend
+## Arquitetura
 
-O frontend não contém mocks. Ele espera as Cloud Functions descritas em `docs/API_CONTRACT.md`.
+```text
+lib/
+  core/
+    router/
+    services/
+    theme/
+  features/
+    auth/
+    billing/
+    dashboard/
+    public/
+    settings/
+    shared/
+    shell/
+web/
+  icons/
+docs/
+.github/workflows/
+```
 
-Variáveis de build:
+## Backend / Back4App
+
+O frontend não usa mocks. As Cloud Functions e classes esperadas estão documentadas em:
+
+`docs/API_CONTRACT.md`
+
+Principais modelos: `_User`, `Client`, `QuoteRequest`, `Quote`, `Service`, `Contract`, `ClosingDocument`, `ShareLog`, `CompanySettings` e `AuditLog`.
+
+## Variáveis de build
 
 ```bash
 --dart-define=APP_ENV=production
@@ -49,4 +86,21 @@ flutter run -d chrome \
 
 ## GitHub Pages
 
-O workflow `.github/workflows/deploy-pages.yml` publica automaticamente a branch `main` em GitHub Pages com base href `/Brilhart_Sistem/`.
+O workflow `.github/workflows/deploy-pages.yml` executa:
+
+1. `flutter pub get`
+2. `flutter analyze`
+3. `flutter build web --release --base-href "/Brilhart_Sistem/"`
+4. cria fallback `404.html` para a SPA
+5. publica em GitHub Pages
+
+No repositório, cadastre em **Settings > Secrets and variables > Actions**:
+
+- `PARSE_APPLICATION_ID`
+- `PARSE_CLIENT_KEY`
+
+E mantenha o GitHub Pages configurado para **GitHub Actions** como fonte de publicação.
+
+## Regra de projeto
+
+Este é um sistema novo e independente. O aplicativo BrilhArte existente não deve ser alterado por este projeto.
