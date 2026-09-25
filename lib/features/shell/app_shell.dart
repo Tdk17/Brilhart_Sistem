@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/services/api_client.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/theme/app_theme.dart';
 
@@ -60,9 +61,7 @@ class AppShell extends StatelessWidget {
             width: 248,
             decoration: const BoxDecoration(
               color: AppColors.surface,
-              border: Border(
-                right: BorderSide(color: Colors.white10),
-              ),
+              border: Border(right: BorderSide(color: Colors.white10)),
             ),
             child: SafeArea(
               child: Column(
@@ -84,31 +83,65 @@ class AppShell extends StatelessWidget {
   }
 }
 
-class _BrandHeader extends StatelessWidget {
+class _BrandHeader extends StatefulWidget {
   const _BrandHeader({this.compact = false});
 
   final bool compact;
 
   @override
+  State<_BrandHeader> createState() => _BrandHeaderState();
+}
+
+class _BrandHeaderState extends State<_BrandHeader> {
+  String? _logoUrl;
+  String _tradeName = 'Brilhart';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCompanyBrand();
+  }
+
+  Future<void> _loadCompanyBrand() async {
+    try {
+      final result = await GetIt.I<ApiClient>().cloud('v1-company-settings-get');
+      if (!mounted) return;
+      setState(() {
+        final logoUrl = '${result['logoUrl'] ?? ''}'.trim();
+        final tradeName = '${result['tradeName'] ?? ''}'.trim();
+        _logoUrl = logoUrl.isEmpty ? null : logoUrl;
+        if (tradeName.isNotEmpty) _tradeName = tradeName;
+      });
+    } catch (_) {
+      // A identidade visual nunca deve impedir o carregamento do sistema.
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final logoSize = widget.compact ? 42.0 : 52.0;
+
     return Row(
       children: [
         Container(
-          width: compact ? 42 : 52,
-          height: compact ? 42 : 52,
-          padding: const EdgeInsets.all(6),
+          width: logoSize,
+          height: logoSize,
+          padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
             color: Colors.black,
             borderRadius: BorderRadius.circular(14),
             border: Border.all(color: AppColors.gold.withValues(alpha: .35)),
           ),
-          child: Image.asset(
-            'assets/images/brilhart_logo.png',
-            fit: BoxFit.contain,
-            errorBuilder: (_, __, ___) => const Icon(
-              Icons.format_paint_outlined,
-              color: AppColors.gold,
-            ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: _logoUrl != null
+                ? Image.network(
+                    _logoUrl!,
+                    fit: BoxFit.contain,
+                    filterQuality: FilterQuality.high,
+                    errorBuilder: (_, __, ___) => _fallbackLogo(),
+                  )
+                : _fallbackLogo(),
           ),
         ),
         const SizedBox(width: 12),
@@ -118,16 +151,16 @@ class _BrandHeader extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                compact ? 'Brilhart' : 'Brilhart Sistem',
+                widget.compact ? _tradeName : 'Brilhart Sistem',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontSize: compact ? 17 : 18,
+                  fontSize: widget.compact ? 17 : 18,
                   fontWeight: FontWeight.w800,
                   color: AppColors.white,
                 ),
               ),
-              if (!compact) ...[
+              if (!widget.compact) ...[
                 const SizedBox(height: 3),
                 const Text(
                   'GESTÃO OPERACIONAL',
@@ -145,6 +178,24 @@ class _BrandHeader extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _fallbackLogo() {
+    return Image.asset(
+      'assets/images/brilhart_logo.png',
+      fit: BoxFit.contain,
+      filterQuality: FilterQuality.high,
+      errorBuilder: (_, __, ___) => const Center(
+        child: Text(
+          'B',
+          style: TextStyle(
+            color: AppColors.gold,
+            fontSize: 24,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+      ),
     );
   }
 }
