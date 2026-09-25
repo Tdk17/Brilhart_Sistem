@@ -18,8 +18,10 @@ class AuthService {
 
     _api.sessionToken = token;
     try {
-      final me = await _api.cloud('v1-auth-me');
-      userName.value = me['name']?.toString() ?? me['username']?.toString();
+      final me = await _api.me();
+      userName.value = me['name']?.toString() ??
+          me['username']?.toString() ??
+          me['email']?.toString();
       isAuthenticated.value = true;
     } catch (_) {
       await logout(localOnly: true);
@@ -29,18 +31,17 @@ class AuthService {
   Future<void> login(String email, String password) async {
     isLoading.value = true;
     try {
-      final result = await _api.cloud('v1-auth-login', {
-        'email': email.trim(),
-        'password': password,
-      });
+      final result = await _api.login(email.trim(), password);
       final token = result['sessionToken']?.toString();
       if (token == null || token.isEmpty) {
-        throw const ApiException('Sessão não retornada pelo backend.');
+        throw const ApiException('Sessão não retornada pelo Back4App.');
       }
       _api.sessionToken = token;
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('sessionToken', token);
-      userName.value = result['name']?.toString() ?? result['username']?.toString();
+      userName.value = result['name']?.toString() ??
+          result['username']?.toString() ??
+          result['email']?.toString();
       isAuthenticated.value = true;
     } finally {
       isLoading.value = false;
@@ -50,7 +51,7 @@ class AuthService {
   Future<void> logout({bool localOnly = false}) async {
     if (!localOnly) {
       try {
-        await _api.cloud('v1-auth-logout');
+        await _api.logout();
       } catch (_) {}
     }
     _api.sessionToken = null;
