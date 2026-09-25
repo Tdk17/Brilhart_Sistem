@@ -6,6 +6,7 @@ import 'package:get_it/get_it.dart';
 
 import '../../core/services/api_client.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/widgets/brilhart_logo.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -45,8 +46,7 @@ class _SettingsPageState extends State<SettingsPage> {
       error = null;
     });
     try {
-      final result =
-          await GetIt.I<ApiClient>().cloud('v1-company-settings-get');
+      final result = await GetIt.I<ApiClient>().cloud('v1-company-settings-get');
       _tradeName.text = '${result['tradeName'] ?? ''}';
       _legalName.text = '${result['legalName'] ?? ''}';
       _cnpj.text = '${result['cnpj'] ?? ''}';
@@ -114,8 +114,7 @@ class _SettingsPageState extends State<SettingsPage> {
         };
       }
 
-      final result = await GetIt.I<ApiClient>()
-          .cloud('v1-company-settings-update', payload);
+      final result = await GetIt.I<ApiClient>().cloud('v1-company-settings-update', payload);
       if (!mounted) return;
       setState(() {
         _logoUrl = result['logoUrl']?.toString() ?? _logoUrl;
@@ -147,171 +146,235 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.fromLTRB(28, 26, 28, 40),
       children: [
-        const Text(
-          'Configurações da empresa',
-          style: TextStyle(fontSize: 30, fontWeight: FontWeight.w800),
-        ),
-        const SizedBox(height: 6),
-        const Text(
-          'Dados usados pelo sistema, orçamentos, contratos e demais documentos.',
-          style: TextStyle(color: AppColors.silverDark),
-        ),
-        const SizedBox(height: 20),
-        if (loading)
-          const Center(
-            child: Padding(
-              padding: EdgeInsets.all(48),
-              child: CircularProgressIndicator(),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: AppColors.gold.withValues(alpha: .12),
+                borderRadius: BorderRadius.circular(15),
+                border: Border.all(color: AppColors.gold.withValues(alpha: .32)),
+              ),
+              child: const Icon(Icons.settings_outlined, color: AppColors.gold),
             ),
-          )
-        else if (error != null)
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
+            const SizedBox(width: 16),
+            const Expanded(
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.cloud_off_outlined,
-                      color: AppColors.gold, size: 42),
-                  const SizedBox(height: 10),
-                  Text('$error', textAlign: TextAlign.center),
-                  const SizedBox(height: 12),
-                  OutlinedButton.icon(
-                    onPressed: _load,
-                    icon: const Icon(Icons.refresh),
-                    label: const Text('Tentar novamente'),
+                  Text('Configurações da empresa', style: TextStyle(fontSize: 30, fontWeight: FontWeight.w800)),
+                  SizedBox(height: 6),
+                  Text(
+                    'Identidade, dados comerciais e informações usadas em documentos.',
+                    style: TextStyle(color: AppColors.silverDark),
                   ),
                 ],
               ),
             ),
-          )
+          ],
+        ),
+        const SizedBox(height: 22),
+        if (loading)
+          _stateCard(const CircularProgressIndicator(), 'Carregando configurações...')
+        else if (error != null)
+          _errorCard()
         else
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(22),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    LayoutBuilder(
-                      builder: (context, constraints) {
-                        final preview = Container(
-                          width: 140,
-                          height: 110,
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.black,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.white12),
-                          ),
-                          child: _logoFile?.bytes != null
-                              ? Image.memory(_logoFile!.bytes!, fit: BoxFit.contain)
-                              : (_logoUrl != null && _logoUrl!.isNotEmpty)
-                                  ? Image.network(
-                                      _logoUrl!,
-                                      fit: BoxFit.contain,
-                                      errorBuilder: (_, __, ___) => Image.asset(
-                                        'assets/images/brilhart_logo.png',
-                                        fit: BoxFit.contain,
-                                      ),
-                                    )
-                                  : Image.asset(
-                                      'assets/images/brilhart_logo.png',
-                                      fit: BoxFit.contain,
-                                    ),
-                        );
-                        final info = Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Logo da empresa',
-                              style: TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.w700),
-                            ),
-                            const SizedBox(height: 6),
-                            const Text(
-                              'Usada no sistema e nos documentos gerados. Formatos de imagem comuns, até 5 MB.',
-                              style: TextStyle(color: AppColors.silverDark),
-                            ),
-                            const SizedBox(height: 10),
-                            OutlinedButton.icon(
-                              onPressed: saving ? null : _pickLogo,
-                              icon: const Icon(Icons.upload_outlined),
-                              label: Text(_logoFile == null
-                                  ? 'Trocar logo'
-                                  : _logoFile!.name),
-                            ),
-                          ],
-                        );
-
-                        if (constraints.maxWidth < 620) {
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              preview,
-                              const SizedBox(height: 14),
-                              info,
-                            ],
-                          );
-                        }
-                        return Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            preview,
-                            const SizedBox(width: 18),
-                            Expanded(child: info),
-                          ],
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 22),
-                    _field(_tradeName, 'Nome comercial', required: true),
-                    _field(_legalName, 'Razão social'),
-                    _field(_cnpj, 'CNPJ'),
-                    _field(_address, 'Endereço'),
-                    _field(_email, 'E-mail',
-                        keyboardType: TextInputType.emailAddress),
-                    _field(_phone, 'Telefone',
-                        keyboardType: TextInputType.phone),
-                    _field(_whatsapp, 'WhatsApp comercial',
-                        keyboardType: TextInputType.phone),
-                    _field(_pixKey, 'Chave Pix'),
-                    _field(
-                      _paymentTerms,
-                      'Condições padrão de pagamento',
-                      minLines: 3,
-                      maxLines: 5,
-                    ),
-                    _field(
-                      _footer,
-                      'Rodapé dos documentos',
-                      minLines: 3,
-                      maxLines: 5,
-                    ),
-                    const SizedBox(height: 8),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: FilledButton.icon(
-                        onPressed: saving ? null : _save,
-                        icon: saving
-                            ? const SizedBox.square(
-                                dimension: 16,
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              )
-                            : const Icon(Icons.save_outlined),
-                        label: const Text('Salvar configurações'),
-                      ),
-                    ),
-                  ],
+          Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                _identityCard(),
+                const SizedBox(height: 16),
+                _businessCard(),
+                const SizedBox(height: 16),
+                _documentsCard(),
+                const SizedBox(height: 18),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: FilledButton.icon(
+                    onPressed: saving ? null : _save,
+                    icon: saving
+                        ? const SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                        : const Icon(Icons.save_outlined),
+                    label: const Text('Salvar configurações'),
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
       ],
     );
   }
+
+  Widget _identityCard() {
+    return _section(
+      title: 'Identidade da empresa',
+      subtitle: 'Logo e identificação comercial exibidas no sistema e nos documentos.',
+      icon: Icons.storefront_outlined,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final preview = Container(
+            width: 180,
+            height: 132,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.black,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: _logoFile?.bytes != null
+                ? Image.memory(_logoFile!.bytes!, fit: BoxFit.contain)
+                : (_logoUrl != null && _logoUrl!.isNotEmpty)
+                    ? Image.network(
+                        _logoUrl!,
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, __, ___) => const BrilhartLogo(height: 100),
+                      )
+                    : const BrilhartLogo(height: 100),
+          );
+
+          final form = Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _field(_tradeName, 'Nome comercial', required: true),
+              _field(_legalName, 'Razão social'),
+              _field(_cnpj, 'CNPJ'),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: OutlinedButton.icon(
+                  onPressed: saving ? null : _pickLogo,
+                  icon: const Icon(Icons.upload_outlined),
+                  label: Text(_logoFile == null ? 'Trocar logo' : _logoFile!.name),
+                ),
+              ),
+            ],
+          );
+
+          if (constraints.maxWidth < 720) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [preview, const SizedBox(height: 18), form],
+            );
+          }
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [preview, const SizedBox(width: 22), Expanded(child: form)],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _businessCard() {
+    return _section(
+      title: 'Dados comerciais',
+      subtitle: 'Informações usadas para contato, pagamento e identificação da empresa.',
+      icon: Icons.business_center_outlined,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxWidth < 760) {
+            return Column(
+              children: [
+                _field(_address, 'Endereço'),
+                _field(_email, 'E-mail', keyboardType: TextInputType.emailAddress),
+                _field(_phone, 'Telefone', keyboardType: TextInputType.phone),
+                _field(_whatsapp, 'WhatsApp comercial', keyboardType: TextInputType.phone),
+                _field(_pixKey, 'Chave Pix'),
+              ],
+            );
+          }
+          return Column(
+            children: [
+              Row(children: [
+                Expanded(child: _field(_address, 'Endereço')),
+                const SizedBox(width: 12),
+                Expanded(child: _field(_email, 'E-mail', keyboardType: TextInputType.emailAddress)),
+              ]),
+              Row(children: [
+                Expanded(child: _field(_phone, 'Telefone', keyboardType: TextInputType.phone)),
+                const SizedBox(width: 12),
+                Expanded(child: _field(_whatsapp, 'WhatsApp comercial', keyboardType: TextInputType.phone)),
+              ]),
+              _field(_pixKey, 'Chave Pix'),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _documentsCard() {
+    return _section(
+      title: 'Padrões de documentos',
+      subtitle: 'Textos aplicados automaticamente nos orçamentos, contratos e fechamentos.',
+      icon: Icons.description_outlined,
+      child: Column(
+        children: [
+          _field(_paymentTerms, 'Condições padrão de pagamento', minLines: 3, maxLines: 5),
+          _field(_footer, 'Rodapé dos documentos', minLines: 3, maxLines: 5),
+        ],
+      ),
+    );
+  }
+
+  Widget _section({required String title, required String subtitle, required IconData icon, required Widget child}) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: AppColors.gold, size: 21),
+              const SizedBox(width: 10),
+              Expanded(child: Text(title, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800))),
+            ],
+          ),
+          const SizedBox(height: 5),
+          Text(subtitle, style: const TextStyle(color: AppColors.silverDark)),
+          const SizedBox(height: 18),
+          child,
+        ],
+      ),
+    );
+  }
+
+  Widget _stateCard(Widget icon, String text) => Container(
+        padding: const EdgeInsets.symmetric(vertical: 64),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Column(children: [icon, const SizedBox(height: 14), Text(text, style: const TextStyle(color: AppColors.silverDark))]),
+      );
+
+  Widget _errorCard() => Container(
+        padding: const EdgeInsets.all(28),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: AppColors.danger.withValues(alpha: .35)),
+        ),
+        child: Column(
+          children: [
+            const Icon(Icons.cloud_off_outlined, color: AppColors.danger, size: 42),
+            const SizedBox(height: 10),
+            Text('$error', textAlign: TextAlign.center),
+            const SizedBox(height: 14),
+            OutlinedButton.icon(onPressed: _load, icon: const Icon(Icons.refresh), label: const Text('Tentar novamente')),
+          ],
+        ),
+      );
 
   Widget _field(
     TextEditingController controller,
@@ -329,9 +392,7 @@ class _SettingsPageState extends State<SettingsPage> {
         minLines: minLines,
         maxLines: maxLines,
         validator: required
-            ? (value) => value == null || value.trim().isEmpty
-                ? 'Campo obrigatório.'
-                : null
+            ? (value) => value == null || value.trim().isEmpty ? 'Campo obrigatório.' : null
             : null,
         decoration: InputDecoration(labelText: label),
       ),
