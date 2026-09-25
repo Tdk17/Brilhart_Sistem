@@ -88,7 +88,7 @@ class ModulePage extends StatefulWidget {
 
 class _ModulePageState extends State<ModulePage> {
   final _search = TextEditingController();
-  String? _status;
+  String _status = '';
   List<dynamic> items = const [];
   bool loading = true;
   Object? error;
@@ -113,7 +113,7 @@ class _ModulePageState extends State<ModulePage> {
     try {
       final result = await GetIt.I<ApiClient>().cloud(widget.listFunction, {
         if (_search.text.trim().isNotEmpty) 'search': _search.text.trim(),
-        if ((_status ?? '').isNotEmpty) 'status': _status,
+        if (_status.isNotEmpty) 'status': _status,
       });
       final raw = result['items'] ?? result['data'] ?? result['results'] ?? const [];
       if (mounted) setState(() => items = raw is List ? raw : [raw]);
@@ -124,66 +124,46 @@ class _ModulePageState extends State<ModulePage> {
     }
   }
 
-  String _idOf(Map<String, dynamic> item) =>
-      '${item['objectId'] ?? item['id'] ?? ''}';
+  String _idOf(Map<String, dynamic> item) => '${item['objectId'] ?? item['id'] ?? ''}';
+
+  IconData get _moduleIcon {
+    switch (widget.icon) {
+      case 'clientes':
+        return Icons.people_alt_outlined;
+      case 'solicitacoes':
+        return Icons.notifications_active_outlined;
+      case 'orcamentos':
+        return Icons.request_quote_outlined;
+      case 'producao':
+        return Icons.precision_manufacturing_outlined;
+      case 'contratos':
+        return Icons.description_outlined;
+      case 'documentos':
+        return Icons.folder_copy_outlined;
+      default:
+        return Icons.dashboard_customize_outlined;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
       onRefresh: _load,
       child: ListView(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.fromLTRB(28, 26, 28, 40),
         children: [
-          Wrap(
-            spacing: 16,
-            runSpacing: 12,
-            alignment: WrapAlignment.spaceBetween,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 760),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(widget.title,
-                        style: const TextStyle(
-                            fontSize: 30, fontWeight: FontWeight.w800)),
-                    const SizedBox(height: 6),
-                    Text(widget.subtitle,
-                        style: const TextStyle(color: AppColors.silverDark)),
-                  ],
-                ),
-              ),
-              if (widget.allowCreate && widget.createFunction != null)
-                FilledButton.icon(
-                  onPressed: () => _showForm(),
-                  icon: const Icon(Icons.add),
-                  label: const Text('Novo'),
-                ),
-            ],
-          ),
+          _pageHeader(),
           const SizedBox(height: 22),
+          _summaryStrip(),
+          const SizedBox(height: 18),
           _filters(),
-          const SizedBox(height: 16),
+          const SizedBox(height: 18),
           if (loading)
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.all(48),
-                child: CircularProgressIndicator(),
-              ),
-            )
+            _loadingState()
           else if (error != null)
             _errorCard()
           else if (items.isEmpty)
-            const Card(
-              child: Padding(
-                padding: EdgeInsets.all(36),
-                child: Center(
-                  child: Text('Nenhum registro encontrado.',
-                      style: TextStyle(color: AppColors.silverDark)),
-                ),
-              ),
-            )
+            _emptyState()
           else
             ...items.map((raw) {
               final item = raw is Map
@@ -196,175 +176,413 @@ class _ModulePageState extends State<ModulePage> {
     );
   }
 
-  Widget _filters() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final search = TextField(
-              controller: _search,
-              onSubmitted: (_) => _load(),
-              decoration: const InputDecoration(
-                hintText: 'Buscar por nome, telefone, número ou descrição',
-                prefixIcon: Icon(Icons.search),
+  Widget _pageHeader() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final title = Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: AppColors.gold.withValues(alpha: .12),
+                borderRadius: BorderRadius.circular(15),
+                border: Border.all(color: AppColors.gold.withValues(alpha: .32)),
               ),
-            );
-            final status = DropdownButtonFormField<String>(
-              initialValue: _status,
-              decoration: const InputDecoration(
-                labelText: 'Status',
-                prefixIcon: Icon(Icons.filter_alt_outlined),
+              child: Icon(_moduleIcon, color: AppColors.gold, size: 26),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.title,
+                    style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w800, letterSpacing: -.4),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(widget.subtitle, style: const TextStyle(color: AppColors.silverDark, height: 1.4)),
+                ],
               ),
-              items: const [
-                DropdownMenuItem(value: null, child: Text('Todos')),
-                DropdownMenuItem(value: 'Novo', child: Text('Novo')),
-                DropdownMenuItem(
-                    value: 'Em atendimento', child: Text('Em atendimento')),
-                DropdownMenuItem(
-                    value: 'Aguardando cliente',
-                    child: Text('Aguardando cliente')),
-                DropdownMenuItem(
-                    value: 'Aguardando', child: Text('Aguardando')),
-                DropdownMenuItem(
-                    value: 'Em Produção', child: Text('Em Produção')),
-                DropdownMenuItem(
-                    value: 'Concluído', child: Text('Concluído')),
-                DropdownMenuItem(
-                    value: 'Cancelado', child: Text('Cancelado')),
+            ),
+          ],
+        );
+
+        final action = widget.allowCreate && widget.createFunction != null
+            ? FilledButton.icon(
+                onPressed: () => _showForm(),
+                icon: const Icon(Icons.add),
+                label: const Text('Novo registro'),
+              )
+            : null;
+
+        if (constraints.maxWidth < 760) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              title,
+              if (action != null) ...[
+                const SizedBox(height: 16),
+                action,
               ],
-              onChanged: (value) {
-                setState(() => _status = value);
-                _load();
-              },
-            );
-            final refresh = IconButton.filledTonal(
+            ],
+          );
+        }
+
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(child: title),
+            if (action != null) ...[
+              const SizedBox(width: 20),
+              action,
+            ],
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _summaryStrip() {
+    final visibleCount = items.length;
+    final withStatus = items.where((raw) {
+      if (raw is! Map) return false;
+      final status = raw['status']?.toString() ?? '';
+      return status.isNotEmpty;
+    }).length;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Wrap(
+        spacing: 24,
+        runSpacing: 12,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          _summaryItem(Icons.inventory_2_outlined, '$visibleCount', 'registros exibidos'),
+          _summaryItem(Icons.flag_outlined, '$withStatus', 'com status'),
+          _summaryItem(Icons.sync_outlined, loading ? 'Atualizando' : 'Sincronizado', 'Back4App'),
+        ],
+      ),
+    );
+  }
+
+  Widget _summaryItem(IconData icon, String value, String label) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 18, color: AppColors.gold),
+        const SizedBox(width: 8),
+        Text(value, style: const TextStyle(fontWeight: FontWeight.w800)),
+        const SizedBox(width: 5),
+        Text(label, style: const TextStyle(color: AppColors.silverDark, fontSize: 12)),
+      ],
+    );
+  }
+
+  Widget _filters() {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final search = TextField(
+            controller: _search,
+            onSubmitted: (_) => _load(),
+            decoration: const InputDecoration(
+              hintText: 'Buscar por nome, telefone, número ou descrição',
+              prefixIcon: Icon(Icons.search),
+            ),
+          );
+          final status = DropdownButtonFormField<String>(
+            initialValue: _status,
+            decoration: const InputDecoration(
+              labelText: 'Status',
+              prefixIcon: Icon(Icons.filter_alt_outlined),
+            ),
+            items: const [
+              DropdownMenuItem(value: '', child: Text('Todos os status')),
+              DropdownMenuItem(value: 'Novo', child: Text('Novo')),
+              DropdownMenuItem(value: 'Em atendimento', child: Text('Em atendimento')),
+              DropdownMenuItem(value: 'Aguardando cliente', child: Text('Aguardando cliente')),
+              DropdownMenuItem(value: 'Aguardando', child: Text('Aguardando')),
+              DropdownMenuItem(value: 'Em Produção', child: Text('Em Produção')),
+              DropdownMenuItem(value: 'Concluído', child: Text('Concluído')),
+              DropdownMenuItem(value: 'Cancelado', child: Text('Cancelado')),
+            ],
+            onChanged: (value) {
+              setState(() => _status = value ?? '');
+              _load();
+            },
+          );
+          final refresh = SizedBox(
+            height: 54,
+            child: OutlinedButton.icon(
               onPressed: _load,
               icon: const Icon(Icons.refresh),
-              tooltip: 'Atualizar',
-            );
+              label: const Text('Atualizar'),
+            ),
+          );
 
-            if (constraints.maxWidth < 720) {
-              return Column(
+          if (constraints.maxWidth < 780) {
+            return Column(
+              children: [
+                search,
+                const SizedBox(height: 10),
+                status,
+                const SizedBox(height: 10),
+                SizedBox(width: double.infinity, child: refresh),
+              ],
+            );
+          }
+          return Row(children: [
+            Expanded(flex: 3, child: search),
+            const SizedBox(width: 10),
+            Expanded(flex: 2, child: status),
+            const SizedBox(width: 10),
+            refresh,
+          ]);
+        },
+      ),
+    );
+  }
+
+  Widget _loadingState() => Container(
+        padding: const EdgeInsets.symmetric(vertical: 72),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: const Column(
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 14),
+            Text('Carregando informações...', style: TextStyle(color: AppColors.silverDark)),
+          ],
+        ),
+      );
+
+  Widget _emptyState() => Container(
+        padding: const EdgeInsets.symmetric(vertical: 56, horizontal: 24),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Column(
+          children: [
+            Container(
+              width: 62,
+              height: 62,
+              decoration: BoxDecoration(
+                color: AppColors.gold.withValues(alpha: .10),
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Icon(_moduleIcon, color: AppColors.gold, size: 30),
+            ),
+            const SizedBox(height: 16),
+            const Text('Nenhum registro encontrado', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 17)),
+            const SizedBox(height: 6),
+            const Text(
+              'Altere os filtros ou adicione um novo registro para começar.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColors.silverDark),
+            ),
+          ],
+        ),
+      );
+
+  Widget _errorCard() => Container(
+        padding: const EdgeInsets.all(28),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: AppColors.danger.withValues(alpha: .35)),
+        ),
+        child: Column(children: [
+          const Icon(Icons.cloud_off_outlined, color: AppColors.danger, size: 42),
+          const SizedBox(height: 12),
+          const Text('Não foi possível carregar os dados.', style: TextStyle(fontWeight: FontWeight.w700)),
+          const SizedBox(height: 7),
+          Text('$error', textAlign: TextAlign.center, style: const TextStyle(color: AppColors.silverDark)),
+          const SizedBox(height: 16),
+          OutlinedButton.icon(onPressed: _load, icon: const Icon(Icons.refresh), label: const Text('Tentar novamente')),
+        ]),
+      );
+
+  Widget _recordCard(Map<String, dynamic> item) {
+    final title = item['name'] ?? item['clientName'] ?? item['number'] ?? item['title'] ?? item['serviceType'] ?? 'Registro';
+    final status = item['status']?.toString();
+    final origin = item['origin']?.toString();
+    final subtitle = item['phone'] ?? item['description'] ?? item['cityAddress'] ?? item['value'] ?? '';
+    final value = item['value'];
+    final dueDate = item['dueDate'] ?? item['date'];
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: () => _showDetails(item),
+        child: Container(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final details = Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  search,
-                  const SizedBox(height: 10),
-                  Row(children: [
-                    Expanded(child: status),
-                    const SizedBox(width: 10),
-                    refresh,
-                  ]),
+                  Text('$title', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+                  if ('$subtitle'.trim().isNotEmpty) ...[
+                    const SizedBox(height: 5),
+                    Text(
+                      '$subtitle',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: AppColors.silverDark, height: 1.35),
+                    ),
+                  ],
+                  const SizedBox(height: 11),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      if (widget.originBadge && origin != null && origin.isNotEmpty)
+                        _softBadge(Icons.source_outlined, 'Origem: $origin', AppColors.silver),
+                      if (status != null && status.isNotEmpty)
+                        _softBadge(Icons.circle, status, _statusColor(status)),
+                      if (value != null && '$value'.isNotEmpty)
+                        _softBadge(Icons.payments_outlined, 'R\$ $value', AppColors.goldSoft),
+                      if (dueDate != null && '$dueDate'.isNotEmpty)
+                        _softBadge(Icons.event_outlined, '$dueDate', AppColors.silver),
+                    ],
+                  ),
                 ],
               );
-            }
-            return Row(children: [
-              Expanded(flex: 3, child: search),
-              const SizedBox(width: 10),
-              Expanded(child: status),
-              const SizedBox(width: 10),
-              refresh,
-            ]);
-          },
+
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: AppColors.gold.withValues(alpha: .10),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Icon(_moduleIcon, color: AppColors.gold, size: 23),
+                  ),
+                  const SizedBox(width: 15),
+                  Expanded(child: details),
+                  const SizedBox(width: 12),
+                  const Icon(Icons.chevron_right, color: AppColors.gold),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
   }
 
-  Widget _errorCard() => Card(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(children: [
-            const Icon(Icons.cloud_off_outlined,
-                color: AppColors.gold, size: 42),
-            const SizedBox(height: 10),
-            Text('$error', textAlign: TextAlign.center),
-            const SizedBox(height: 12),
-            OutlinedButton.icon(
-              onPressed: _load,
-              icon: const Icon(Icons.refresh),
-              label: const Text('Tentar novamente'),
-            ),
-          ]),
-        ),
-      );
-
-  Widget _recordCard(Map<String, dynamic> item) {
-    final title = item['name'] ??
-        item['clientName'] ??
-        item['number'] ??
-        item['title'] ??
-        item['serviceType'] ??
-        'Registro';
-    final status = item['status']?.toString();
-    final origin = item['origin']?.toString();
-    final subtitle = item['phone'] ??
-        item['description'] ??
-        item['cityAddress'] ??
-        item['value'] ??
-        '';
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Card(
-        child: ListTile(
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-          leading: const CircleAvatar(
-            backgroundColor: Color(0xFF2A2412),
-            child: Icon(Icons.folder_open_outlined, color: AppColors.gold),
-          ),
-          title: Text('$title',
-              style: const TextStyle(fontWeight: FontWeight.w700)),
-          subtitle: Text('$subtitle'),
-          trailing: Wrap(
-            spacing: 8,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              if (widget.originBadge && origin != null && origin.isNotEmpty)
-                Chip(label: Text('Origem: $origin')),
-              if (status != null && status.isNotEmpty)
-                Chip(label: Text(status)),
-              const Icon(Icons.chevron_right),
-            ],
-          ),
-          onTap: () => _showDetails(item),
-        ),
+  Widget _softBadge(IconData icon, String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: .08),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: color.withValues(alpha: .22)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: color),
+          const SizedBox(width: 6),
+          Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: color)),
+        ],
       ),
     );
+  }
+
+  Color _statusColor(String status) {
+    final value = status.toLowerCase();
+    if (value.contains('conclu') || value.contains('aprov') || value.contains('assinado')) return AppColors.success;
+    if (value.contains('cancel') || value.contains('atras')) return AppColors.danger;
+    if (value.contains('produção') || value.contains('atendimento')) return AppColors.gold;
+    return AppColors.silver;
   }
 
   Future<void> _showDetails(Map<String, dynamic> item) async {
     await showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text(widget.title),
+        titlePadding: const EdgeInsets.fromLTRB(24, 22, 24, 0),
+        contentPadding: const EdgeInsets.fromLTRB(24, 18, 24, 8),
+        title: Row(
+          children: [
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: AppColors.gold.withValues(alpha: .12),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(_moduleIcon, color: AppColors.gold),
+            ),
+            const SizedBox(width: 12),
+            Expanded(child: Text(widget.title, style: const TextStyle(fontWeight: FontWeight.w800))),
+          ],
+        ),
         content: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 680),
+          constraints: const BoxConstraints(maxWidth: 760),
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                ...item.entries
-                    .where((entry) =>
-                        !entry.key.startsWith('_') &&
-                        !entry.key.toLowerCase().contains('base64'))
-                    .map((entry) => Padding(
-                          padding: const EdgeInsets.only(bottom: 10),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(entry.key,
-                                  style: const TextStyle(
-                                      fontSize: 12,
-                                      color: AppColors.silverDark)),
-                              const SizedBox(height: 2),
-                              Text('${entry.value}'),
-                            ],
-                          ),
-                        )),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceAlt,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Wrap(
+                    spacing: 20,
+                    runSpacing: 16,
+                    children: item.entries
+                        .where((entry) => !entry.key.startsWith('_') && !entry.key.toLowerCase().contains('base64'))
+                        .map((entry) => SizedBox(
+                              width: 210,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(_fieldLabel(entry.key), style: const TextStyle(fontSize: 11, color: AppColors.silverDark, fontWeight: FontWeight.w700)),
+                                  const SizedBox(height: 4),
+                                  SelectableText('${entry.value}', style: const TextStyle(fontWeight: FontWeight.w600)),
+                                ],
+                              ),
+                            ))
+                        .toList(),
+                  ),
+                ),
                 if (widget.actions.isNotEmpty) ...[
-                  const Divider(),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 18),
+                  const Text('Ações rápidas', style: TextStyle(fontWeight: FontWeight.w800)),
+                  const SizedBox(height: 10),
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
@@ -398,23 +616,47 @@ class _ModulePageState extends State<ModulePage> {
                 Navigator.pop(dialogContext);
                 _delete(item);
               },
-              icon: const Icon(Icons.delete_outline),
-              label: const Text('Excluir'),
+              icon: const Icon(Icons.delete_outline, color: AppColors.danger),
+              label: const Text('Excluir', style: TextStyle(color: AppColors.danger)),
             ),
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Fechar'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Fechar')),
         ],
       ),
     );
   }
 
-  Future<void> _runAction(
-      ModuleAction action, Map<String, dynamic> item) async {
+  String _fieldLabel(String key) {
+    const labels = {
+      'objectId': 'ID',
+      'clientId': 'Cliente',
+      'clientName': 'Cliente',
+      'clientPhone': 'Telefone',
+      'name': 'Nome',
+      'phone': 'Telefone / WhatsApp',
+      'cityAddress': 'Endereço / cidade',
+      'serviceType': 'Tipo de serviço',
+      'description': 'Descrição',
+      'value': 'Valor',
+      'paymentMethod': 'Forma de pagamento',
+      'dueDate': 'Prazo / data',
+      'measurements': 'Metragem',
+      'additionalMeasurements': 'Metragem adicional',
+      'baseColor': 'Cor base',
+      'status': 'Status',
+      'origin': 'Origem',
+      'number': 'Número',
+      'type': 'Tipo',
+      'date': 'Data',
+      'note': 'Observação',
+      'createdAt': 'Criado em',
+      'updatedAt': 'Atualizado em',
+    };
+    return labels[key] ?? key;
+  }
+
+  Future<void> _runAction(ModuleAction action, Map<String, dynamic> item) async {
     if (action.type == ModuleActionType.whatsapp) {
-      final phone =
-          '${item['phone'] ?? item['whatsapp'] ?? item['clientPhone'] ?? ''}';
+      final phone = '${item['phone'] ?? item['whatsapp'] ?? item['clientPhone'] ?? ''}';
       if (phone.trim().isEmpty) {
         _snack('Registro sem WhatsApp.');
         return;
@@ -431,12 +673,8 @@ class _ModulePageState extends State<ModulePage> {
               title: Text(action.label),
               content: Text(action.confirmMessage!),
               actions: [
-                TextButton(
-                    onPressed: () => Navigator.pop(ctx, false),
-                    child: const Text('Cancelar')),
-                FilledButton(
-                    onPressed: () => Navigator.pop(ctx, true),
-                    child: const Text('Confirmar')),
+                TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+                FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Confirmar')),
               ],
             ),
           ) ??
@@ -450,10 +688,7 @@ class _ModulePageState extends State<ModulePage> {
         ...action.payload,
       });
       if (action.openReturnedUrl) {
-        final url = result['url'] ??
-            result['pdfUrl'] ??
-            result['downloadUrl'] ??
-            result['fileUrl'];
+        final url = result['url'] ?? result['pdfUrl'] ?? result['downloadUrl'] ?? result['fileUrl'];
         if (url == null || '$url'.isEmpty) {
           _snack('Documento gerado, mas o backend não retornou a URL.');
         } else {
@@ -475,9 +710,7 @@ class _ModulePageState extends State<ModulePage> {
     final files = <String, PlatformFile>{};
     for (final field in widget.fields) {
       if (field.type != ModuleFieldType.file) {
-        controllers[field.key] = TextEditingController(
-          text: item?[field.key]?.toString() ?? '',
-        );
+        controllers[field.key] = TextEditingController(text: item?[field.key]?.toString() ?? '');
       }
     }
     final formKey = GlobalKey<FormState>();
@@ -489,10 +722,7 @@ class _ModulePageState extends State<ModulePage> {
       builder: (dialogContext) => StatefulBuilder(
         builder: (dialogContext, setLocalState) {
           Future<void> chooseFile(ModuleField field) async {
-            final result = await FilePicker.platform.pickFiles(
-              allowMultiple: false,
-              withData: true,
-            );
+            final result = await FilePicker.platform.pickFiles(allowMultiple: false, withData: true);
             if (result == null || result.files.isEmpty) return;
             final file = result.files.first;
             if (file.bytes == null) {
@@ -508,8 +738,7 @@ class _ModulePageState extends State<ModulePage> {
 
           Future<void> save() async {
             if (!(formKey.currentState?.validate() ?? false)) return;
-            for (final field in widget.fields.where((field) =>
-                field.type == ModuleFieldType.file && field.required)) {
+            for (final field in widget.fields.where((field) => field.type == ModuleFieldType.file && field.required)) {
               if (!editing && files[field.key] == null) {
                 _snack('Selecione ${field.label}.');
                 return;
@@ -518,27 +747,19 @@ class _ModulePageState extends State<ModulePage> {
 
             setLocalState(() => saving = true);
             try {
-              final payload = <String, dynamic>{
-                if (editing) 'id': _idOf(item),
-              };
+              final payload = <String, dynamic>{if (editing) 'id': _idOf(item)};
               for (final field in widget.fields) {
                 if (field.type == ModuleFieldType.file) {
                   final file = files[field.key];
                   if (file != null && file.bytes != null) {
-                    payload[field.key] = {
-                      'name': file.name,
-                      'base64': base64Encode(file.bytes!),
-                    };
+                    payload[field.key] = {'name': file.name, 'base64': base64Encode(file.bytes!)};
                   }
                 } else {
                   payload[field.key] = controllers[field.key]!.text.trim();
                 }
               }
 
-              await GetIt.I<ApiClient>().cloud(
-                editing ? widget.updateFunction! : widget.createFunction!,
-                payload,
-              );
+              await GetIt.I<ApiClient>().cloud(editing ? widget.updateFunction! : widget.createFunction!, payload);
               if (dialogContext.mounted) Navigator.pop(dialogContext);
               _snack(editing ? 'Registro atualizado.' : 'Registro criado.');
               await _load();
@@ -550,72 +771,85 @@ class _ModulePageState extends State<ModulePage> {
           }
 
           return AlertDialog(
-            title: Text(editing
-                ? 'Editar - ${widget.title}'
-                : 'Novo - ${widget.title}'),
+            titlePadding: const EdgeInsets.fromLTRB(24, 22, 24, 0),
+            contentPadding: const EdgeInsets.fromLTRB(24, 18, 24, 6),
+            title: Row(
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: AppColors.gold.withValues(alpha: .12),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(editing ? Icons.edit_outlined : Icons.add, color: AppColors.gold),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(editing ? 'Editar registro' : 'Novo registro', style: const TextStyle(fontWeight: FontWeight.w800)),
+                      Text(widget.title, style: const TextStyle(fontSize: 12, color: AppColors.silverDark)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
             content: SizedBox(
-              width: 620,
+              width: 680,
               child: Form(
                 key: formKey,
                 child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      for (final field in widget.fields) ...[
-                        if (field.type == ModuleFieldType.file)
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: OutlinedButton.icon(
-                              onPressed:
-                                  saving ? null : () => chooseFile(field),
-                              icon: const Icon(Icons.attach_file),
-                              label:
-                                  Text(files[field.key]?.name ?? field.label),
-                            ),
-                          )
-                        else
-                          TextFormField(
-                            controller: controllers[field.key],
-                            minLines: field.type == ModuleFieldType.multiline
-                                ? 3
-                                : 1,
-                            maxLines: field.type == ModuleFieldType.multiline
-                                ? 6
-                                : 1,
-                            keyboardType: _keyboardType(field.type),
-                            validator: field.required
-                                ? (value) =>
-                                    value == null || value.trim().isEmpty
-                                        ? 'Campo obrigatório.'
-                                        : null
-                                : null,
-                            decoration: InputDecoration(
-                              labelText: field.label,
-                              suffixIcon: field.type == ModuleFieldType.date
-                                  ? const Icon(Icons.event_outlined)
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceAlt,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    child: Column(
+                      children: [
+                        for (final field in widget.fields) ...[
+                          if (field.type == ModuleFieldType.file)
+                            SizedBox(
+                              width: double.infinity,
+                              child: OutlinedButton.icon(
+                                onPressed: saving ? null : () => chooseFile(field),
+                                icon: const Icon(Icons.attach_file),
+                                label: Text(files[field.key]?.name ?? field.label),
+                              ),
+                            )
+                          else
+                            TextFormField(
+                              controller: controllers[field.key],
+                              minLines: field.type == ModuleFieldType.multiline ? 3 : 1,
+                              maxLines: field.type == ModuleFieldType.multiline ? 6 : 1,
+                              keyboardType: _keyboardType(field.type),
+                              validator: field.required
+                                  ? (value) => value == null || value.trim().isEmpty ? 'Campo obrigatório.' : null
                                   : null,
+                              decoration: InputDecoration(
+                                labelText: field.label,
+                                suffixIcon: field.type == ModuleFieldType.date ? const Icon(Icons.event_outlined) : null,
+                              ),
                             ),
-                          ),
-                        const SizedBox(height: 12),
+                          const SizedBox(height: 12),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
                 ),
               ),
             ),
             actions: [
-              TextButton(
-                onPressed: saving ? null : () => Navigator.pop(dialogContext),
-                child: const Text('Cancelar'),
-              ),
+              TextButton(onPressed: saving ? null : () => Navigator.pop(dialogContext), child: const Text('Cancelar')),
               FilledButton.icon(
                 onPressed: saving ? null : save,
                 icon: saving
-                    ? const SizedBox.square(
-                        dimension: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
+                    ? const SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 2))
                     : const Icon(Icons.save_outlined),
-                label: Text(editing ? 'Salvar' : 'Criar'),
+                label: Text(editing ? 'Salvar alterações' : 'Criar registro'),
               ),
             ],
           );
@@ -645,15 +879,10 @@ class _ModulePageState extends State<ModulePage> {
           context: context,
           builder: (ctx) => AlertDialog(
             title: const Text('Excluir registro'),
-            content: const Text(
-                'Confirma a exclusão? As regras do backend ainda serão aplicadas.'),
+            content: const Text('Confirma a exclusão? As regras de segurança do backend serão aplicadas.'),
             actions: [
-              TextButton(
-                  onPressed: () => Navigator.pop(ctx, false),
-                  child: const Text('Cancelar')),
-              FilledButton(
-                  onPressed: () => Navigator.pop(ctx, true),
-                  child: const Text('Excluir')),
+              TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+              FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Excluir')),
             ],
           ),
         ) ??
@@ -661,9 +890,7 @@ class _ModulePageState extends State<ModulePage> {
     if (!confirmed) return;
 
     try {
-      await GetIt.I<ApiClient>().cloud(widget.deleteFunction!, {
-        'id': _idOf(item),
-      });
+      await GetIt.I<ApiClient>().cloud(widget.deleteFunction!, {'id': _idOf(item)});
       _snack('Registro excluído.');
       await _load();
     } catch (e) {
