@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/services/auth_service.dart';
 import '../../core/theme/app_theme.dart';
-import '../../core/widgets/brilhart_logo.dart';
 
 class AppShell extends StatelessWidget {
   const AppShell({super.key, required this.child});
@@ -31,15 +30,9 @@ class AppShell extends StatelessWidget {
     if (compact) {
       return Scaffold(
         appBar: AppBar(
-          backgroundColor: AppColors.black,
-          titleSpacing: 12,
-          title: const Row(
-            children: [
-              BrilhartLogo(height: 34, width: 110),
-              SizedBox(width: 10),
-              Text('Brilhart Sistem', style: TextStyle(fontWeight: FontWeight.w700)),
-            ],
-          ),
+          backgroundColor: AppColors.surface,
+          titleSpacing: 8,
+          title: const _BrandHeader(compact: true),
         ),
         drawer: Drawer(
           backgroundColor: AppColors.surface,
@@ -47,8 +40,8 @@ class AppShell extends StatelessWidget {
             child: Column(
               children: [
                 const Padding(
-                  padding: EdgeInsets.fromLTRB(18, 22, 18, 16),
-                  child: BrilhartLogo(height: 86),
+                  padding: EdgeInsets.fromLTRB(18, 18, 18, 12),
+                  child: _BrandHeader(),
                 ),
                 const Divider(height: 1),
                 Expanded(child: _Menu(items: _items)),
@@ -63,46 +56,95 @@ class AppShell extends StatelessWidget {
     return Scaffold(
       body: Row(
         children: [
-          SizedBox(
-            width: 286,
-            child: DecoratedBox(
-              decoration: const BoxDecoration(
-                color: AppColors.surface,
-                border: Border(right: BorderSide(color: AppColors.border)),
+          Container(
+            width: 248,
+            decoration: const BoxDecoration(
+              color: AppColors.surface,
+              border: Border(
+                right: BorderSide(color: Colors.white10),
               ),
-              child: SafeArea(
-                child: Column(
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.fromLTRB(24, 24, 24, 18),
-                      child: BrilhartLogo(height: 92),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 22),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'GESTÃO OPERACIONAL',
-                          style: TextStyle(
-                            fontSize: 10,
-                            letterSpacing: 1.5,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.silverDark,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    const Divider(height: 1),
-                    Expanded(child: _Menu(items: _items)),
-                  ],
-                ),
+            ),
+            child: SafeArea(
+              child: Column(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(18, 20, 18, 16),
+                    child: _BrandHeader(),
+                  ),
+                  const Divider(height: 1),
+                  Expanded(child: _Menu(items: _items)),
+                ],
               ),
             ),
           ),
           Expanded(child: child),
         ],
       ),
+    );
+  }
+}
+
+class _BrandHeader extends StatelessWidget {
+  const _BrandHeader({this.compact = false});
+
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: compact ? 42 : 52,
+          height: compact ? 42 : 52,
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: Colors.black,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppColors.gold.withValues(alpha: .35)),
+          ),
+          child: Image.asset(
+            'assets/images/brilhart_logo.png',
+            fit: BoxFit.contain,
+            errorBuilder: (_, __, ___) => const Icon(
+              Icons.format_paint_outlined,
+              color: AppColors.gold,
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                compact ? 'Brilhart' : 'Brilhart Sistem',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: compact ? 17 : 18,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.white,
+                ),
+              ),
+              if (!compact) ...[
+                const SizedBox(height: 3),
+                const Text(
+                  'GESTÃO OPERACIONAL',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 9,
+                    letterSpacing: 1.15,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.silverDark,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
@@ -115,53 +157,80 @@ class _Menu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final location = GoRouterState.of(context).matchedLocation;
+
     return Column(
       children: [
         Expanded(
           child: ListView.separated(
-            padding: const EdgeInsets.all(14),
+            padding: const EdgeInsets.fromLTRB(12, 14, 12, 14),
             itemCount: items.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 6),
+            separatorBuilder: (_, __) => const SizedBox(height: 5),
             itemBuilder: (_, index) {
               final item = items[index];
               final selected = location == item.path;
-              return ListTile(
-                minTileHeight: 50,
-                selected: selected,
-                selectedColor: AppColors.gold,
-                selectedTileColor: const Color(0xFF211C0D),
-                iconColor: selected ? AppColors.gold : AppColors.silver,
-                textColor: selected ? AppColors.gold : AppColors.silver,
-                leading: Icon(item.icon, size: 21),
-                title: Text(
-                  item.label,
-                  style: TextStyle(
-                    fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+
+              return Material(
+                color: selected ? AppColors.gold : Colors.transparent,
+                borderRadius: BorderRadius.circular(12),
+                child: ListTile(
+                  minTileHeight: 46,
+                  dense: true,
+                  horizontalTitleGap: 11,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 13),
+                  leading: Icon(
+                    item.icon,
+                    size: 20,
+                    color: selected ? AppColors.black : AppColors.silver,
                   ),
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  side: BorderSide(
-                    color: selected
-                        ? AppColors.gold.withValues(alpha: .55)
-                        : Colors.transparent,
+                  title: Text(
+                    item.label,
+                    style: TextStyle(
+                      color: selected ? AppColors.black : AppColors.silver,
+                      fontSize: 14,
+                      fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                    ),
                   ),
+                  trailing: selected
+                      ? const Icon(
+                          Icons.chevron_right_rounded,
+                          size: 18,
+                          color: AppColors.black,
+                        )
+                      : null,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  onTap: () {
+                    Navigator.maybePop(context);
+                    context.go(item.path);
+                  },
                 ),
-                onTap: () {
-                  Navigator.maybePop(context);
-                  context.go(item.path);
-                },
               );
             },
           ),
         ),
         const Divider(height: 1),
         Padding(
-          padding: const EdgeInsets.all(14),
+          padding: const EdgeInsets.all(12),
           child: ListTile(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            leading: const Icon(Icons.logout, color: AppColors.silver),
-            title: const Text('Sair'),
+            minTileHeight: 46,
+            dense: true,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 13),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            leading: const Icon(
+              Icons.logout_rounded,
+              size: 20,
+              color: AppColors.silver,
+            ),
+            title: const Text(
+              'Sair',
+              style: TextStyle(
+                color: AppColors.silver,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
             onTap: () async {
               await GetIt.I<AuthService>().logout();
               if (context.mounted) context.go('/login');
@@ -175,6 +244,7 @@ class _Menu extends StatelessWidget {
 
 class _NavItem {
   const _NavItem(this.path, this.label, this.icon);
+
   final String path;
   final String label;
   final IconData icon;
