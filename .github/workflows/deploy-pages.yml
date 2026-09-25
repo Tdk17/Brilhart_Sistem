@@ -21,6 +21,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Restore Brilhart logo asset
+        run: |
+          base64 -d assets/images/brilhart_logo.png.b64 > assets/images/brilhart_logo.png
+          file assets/images/brilhart_logo.png
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
