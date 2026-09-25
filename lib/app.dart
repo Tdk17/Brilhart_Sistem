@@ -9,7 +9,7 @@ class BrilhartApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'BrilhArte Sistem',
+      title: 'Brilhart Sistem',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark,
       routerConfig: appRouter,
