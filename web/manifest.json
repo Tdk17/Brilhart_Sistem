@@ -1,11 +1,11 @@
 {
-  "name": "BrilhArte Sistem",
-  "short_name": "BrilhArte",
+  "name": "Brilhart Sistem",
+  "short_name": "Brilhart",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#070707",
   "theme_color": "#070707",
-  "description": "Sistema interno Web/PWA da BrilhArte Laqueamentos.",
+  "description": "Sistema interno Web/PWA da Brilhart Laqueamentos.",
   "orientation": "portrait-primary",
   "prefer_related_applications": false,
   "icons": [
