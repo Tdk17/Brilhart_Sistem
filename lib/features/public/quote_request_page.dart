@@ -6,6 +6,7 @@ import 'package:get_it/get_it.dart';
 
 import '../../core/services/api_client.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/widgets/brilhart_logo.dart';
 
 class QuoteRequestPage extends StatefulWidget {
   const QuoteRequestPage({super.key});
@@ -104,10 +105,10 @@ class _QuoteRequestPageState extends State<QuoteRequestPage> {
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFF17130A), AppColors.black],
+          gradient: RadialGradient(
+            center: Alignment.topRight,
+            radius: 1.3,
+            colors: [Color(0xFF2A2412), Color(0xFF101010), AppColors.black],
           ),
         ),
         child: SafeArea(
@@ -115,10 +116,22 @@ class _QuoteRequestPageState extends State<QuoteRequestPage> {
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 760),
-                child: Card(
+                constraints: const BoxConstraints(maxWidth: 820),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: AppColors.border),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: .32),
+                        blurRadius: 28,
+                        offset: const Offset(0, 18),
+                      ),
+                    ],
+                  ),
                   child: Padding(
-                    padding: const EdgeInsets.all(28),
+                    padding: const EdgeInsets.all(30),
                     child: _sent ? _success() : _form(),
                   ),
                 ),
@@ -133,23 +146,30 @@ class _QuoteRequestPageState extends State<QuoteRequestPage> {
   Widget _success() => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.task_alt, size: 64, color: AppColors.gold),
-          const SizedBox(height: 16),
-          const Text(
-            'Solicitação enviada',
-            style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
+          const BrilhartLogo(height: 94),
+          const SizedBox(height: 24),
+          Container(
+            width: 68,
+            height: 68,
+            decoration: BoxDecoration(
+              color: AppColors.success.withValues(alpha: .10),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Icon(Icons.task_alt, size: 38, color: AppColors.success),
           ),
+          const SizedBox(height: 16),
+          const Text('Solicitação enviada', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800)),
           const SizedBox(height: 8),
           const Text(
-            'A Brilhart recebeu seus dados. Esta solicitação ainda não é um orçamento oficial; nossa equipe entrará em contato para dar continuidade.',
+            'A Brilhart recebeu seus dados. Nossa equipe analisará as informações antes de emitir o orçamento oficial.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: AppColors.silverDark),
+            style: TextStyle(color: AppColors.silverDark, height: 1.45),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 22),
           OutlinedButton.icon(
             onPressed: () => setState(() => _sent = false),
             icon: const Icon(Icons.add),
-            label: const Text('Nova solicitação'),
+            label: const Text('Enviar nova solicitação'),
           ),
         ],
       );
@@ -159,99 +179,110 @@ class _QuoteRequestPageState extends State<QuoteRequestPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Image.asset(
-              'assets/images/brilhart_logo.png',
-              height: 105,
-              fit: BoxFit.contain,
-              errorBuilder: (_, __, ___) => const Icon(
-                Icons.format_paint,
-                size: 60,
-                color: AppColors.gold,
-              ),
-            ),
-            const SizedBox(height: 18),
+            const Center(child: BrilhartLogo(height: 112)),
+            const SizedBox(height: 20),
             const Text(
               'Solicitar orçamento',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 7),
             const Text(
-              'Envie as informações do serviço. A equipe da Brilhart analisará a solicitação antes de gerar o orçamento oficial.',
+              'Preencha as informações abaixo para nossa equipe avaliar o serviço e preparar uma proposta.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.silverDark),
+              style: TextStyle(color: AppColors.silverDark, height: 1.45),
             ),
-            const SizedBox(height: 24),
-            _requiredField(_name, 'Nome', Icons.person_outline),
-            const SizedBox(height: 12),
-            _requiredField(
-              _phone,
-              'WhatsApp',
-              Icons.phone_outlined,
-              keyboardType: TextInputType.phone,
-            ),
-            const SizedBox(height: 12),
-            _requiredField(
-                _city, 'Cidade / endereço', Icons.location_on_outlined),
-            const SizedBox(height: 12),
-            _requiredField(
-                _serviceType, 'Tipo de serviço', Icons.handyman_outlined),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _description,
-              minLines: 4,
-              maxLines: 7,
-              validator: (value) => value == null || value.trim().isEmpty
-                  ? 'Descreva o serviço.'
-                  : null,
-              decoration: const InputDecoration(
-                labelText: 'Descrição',
-                alignLabelWithHint: true,
+            const SizedBox(height: 26),
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceAlt,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: AppColors.border),
               ),
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _measurements,
-              decoration: const InputDecoration(
-                labelText: 'Medidas / metragem (se souber)',
-                prefixIcon: Icon(Icons.straighten),
+              child: Column(
+                children: [
+                  _requiredField(_name, 'Nome', Icons.person_outline),
+                  const SizedBox(height: 12),
+                  _requiredField(_phone, 'WhatsApp', Icons.phone_outlined, keyboardType: TextInputType.phone),
+                  const SizedBox(height: 12),
+                  _requiredField(_city, 'Cidade / endereço', Icons.location_on_outlined),
+                  const SizedBox(height: 12),
+                  _requiredField(_serviceType, 'Tipo de serviço', Icons.handyman_outlined),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _description,
+                    minLines: 4,
+                    maxLines: 7,
+                    validator: (value) => value == null || value.trim().isEmpty ? 'Descreva o serviço.' : null,
+                    decoration: const InputDecoration(
+                      labelText: 'Descrição do serviço',
+                      alignLabelWithHint: true,
+                      prefixIcon: Icon(Icons.notes_outlined),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _measurements,
+                    decoration: const InputDecoration(
+                      labelText: 'Medidas / metragem (se souber)',
+                      prefixIcon: Icon(Icons.straighten),
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 16),
-            OutlinedButton.icon(
-              onPressed: _busy ? null : _pickPhotos,
-              icon: const Icon(Icons.add_photo_alternate_outlined),
-              label: Text(_photos.isEmpty
-                  ? 'Adicionar fotos'
-                  : '${_photos.length} foto(s) selecionada(s)'),
-            ),
-            if (_photos.isNotEmpty) ...[
-              const SizedBox(height: 10),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: _photos
-                    .map((e) => Chip(
-                          label: Text(e.name, overflow: TextOverflow.ellipsis),
-                        ))
-                    .toList(),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceAlt,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: AppColors.border),
               ),
-            ],
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text('Fotos do serviço', style: TextStyle(fontWeight: FontWeight.w800)),
+                  const SizedBox(height: 5),
+                  const Text('Você pode enviar até 8 imagens, com no máximo 8 MB cada.', style: TextStyle(color: AppColors.silverDark, fontSize: 12)),
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    onPressed: _busy ? null : _pickPhotos,
+                    icon: const Icon(Icons.add_photo_alternate_outlined),
+                    label: Text(_photos.isEmpty ? 'Adicionar fotos' : '${_photos.length} foto(s) selecionada(s)'),
+                  ),
+                  if (_photos.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: _photos.map((e) => Chip(label: Text(e.name, overflow: TextOverflow.ellipsis))).toList(),
+                    ),
+                  ],
+                ],
+              ),
+            ),
             if (_error != null) ...[
               const SizedBox(height: 14),
-              Text(_error!, style: const TextStyle(color: AppColors.danger)),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.danger.withValues(alpha: .08),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.danger.withValues(alpha: .35)),
+                ),
+                child: Text(_error!, style: const TextStyle(color: AppColors.danger)),
+              ),
             ],
             const SizedBox(height: 20),
             FilledButton.icon(
               onPressed: _busy ? null : _submit,
               icon: _busy
-                  ? const SizedBox.square(
-                      dimension: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
+                  ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
                   : const Icon(Icons.send_outlined),
               label: const Padding(
-                padding: EdgeInsets.symmetric(vertical: 14),
+                padding: EdgeInsets.symmetric(vertical: 3),
                 child: Text('Enviar solicitação'),
               ),
             ),
@@ -268,9 +299,7 @@ class _QuoteRequestPageState extends State<QuoteRequestPage> {
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
-      validator: (value) => value == null || value.trim().isEmpty
-          ? 'Campo obrigatório.'
-          : null,
+      validator: (value) => value == null || value.trim().isEmpty ? 'Campo obrigatório.' : null,
       decoration: InputDecoration(labelText: label, prefixIcon: Icon(icon)),
     );
   }
