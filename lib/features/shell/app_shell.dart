@@ -106,23 +106,30 @@ class _Menu extends StatelessWidget {
           child: ListView.separated(
             padding: const EdgeInsets.all(14),
             itemCount: items.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 4),
+            separatorBuilder: (_, __) => const SizedBox(height: 6),
             itemBuilder: (_, index) {
               final item = items[index];
               final selected = location == item.path;
               return ListTile(
                 selected: selected,
-                selectedColor: AppColors.black,
-                selectedTileColor: AppColors.gold,
-                iconColor: selected ? AppColors.black : AppColors.silver,
-                textColor: selected ? AppColors.black : AppColors.silver,
+                selectedColor: AppColors.gold,
+                selectedTileColor: const Color(0xFF211C0D),
+                iconColor: selected ? AppColors.gold : AppColors.silver,
+                textColor: selected ? AppColors.gold : AppColors.silver,
                 leading: Icon(item.icon),
                 title: Text(
                   item.label,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                    fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+                  ),
                 ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(
+                    color: selected
+                        ? AppColors.gold.withValues(alpha: .55)
+                        : Colors.transparent,
+                  ),
                 ),
                 onTap: () {
                   Navigator.maybePop(context);
