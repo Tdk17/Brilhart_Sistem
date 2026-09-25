@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/services/auth_service.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/widgets/brilhart_logo.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -16,6 +17,7 @@ class _LoginPageState extends State<LoginPage> {
   final _email = TextEditingController();
   final _password = TextEditingController();
   bool _busy = false;
+  bool _hidePassword = true;
   String? _error;
 
   Future<void> _submit() async {
@@ -51,40 +53,43 @@ class _LoginPageState extends State<LoginPage> {
         decoration: const BoxDecoration(
           gradient: RadialGradient(
             center: Alignment.topRight,
-            radius: 1.3,
-            colors: [Color(0xFF2A2412), AppColors.black],
+            radius: 1.25,
+            colors: [Color(0xFF2B2410), Color(0xFF101010), AppColors.black],
           ),
         ),
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 430),
-              child: Card(
+              constraints: const BoxConstraints(maxWidth: 470),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: AppColors.border),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: .35),
+                      blurRadius: 28,
+                      offset: const Offset(0, 18),
+                    ),
+                  ],
+                ),
                 child: Padding(
-                  padding: const EdgeInsets.all(32),
+                  padding: const EdgeInsets.all(34),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Image.asset(
-                        'assets/images/brilhart_logo.png',
-                        height: 120,
-                        fit: BoxFit.contain,
-                        errorBuilder: (_, __, ___) => const Icon(
-                          Icons.format_paint,
-                          size: 72,
-                          color: AppColors.gold,
-                        ),
-                      ),
-                      const SizedBox(height: 28),
+                      const Center(child: BrilhartLogo(height: 112)),
+                      const SizedBox(height: 24),
                       const Text(
                         'Acesso ao sistema',
                         textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
+                        style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
                       ),
                       const SizedBox(height: 8),
                       const Text(
-                        'Uso interno Brilhart Laqueamentos',
+                        'Gestão interna • Brilhart Laqueamentos',
                         textAlign: TextAlign.center,
                         style: TextStyle(color: AppColors.silverDark),
                       ),
@@ -101,19 +106,35 @@ class _LoginPageState extends State<LoginPage> {
                       const SizedBox(height: 14),
                       TextField(
                         controller: _password,
-                        obscureText: true,
+                        obscureText: _hidePassword,
                         autofillHints: const [AutofillHints.password],
                         onSubmitted: (_) => _submit(),
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Senha',
-                          prefixIcon: Icon(Icons.lock_outline),
+                          prefixIcon: const Icon(Icons.lock_outline),
+                          suffixIcon: IconButton(
+                            onPressed: () => setState(() => _hidePassword = !_hidePassword),
+                            icon: Icon(_hidePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+                          ),
                         ),
                       ),
                       if (_error != null) ...[
                         const SizedBox(height: 14),
-                        Text(
-                          _error!,
-                          style: const TextStyle(color: AppColors.danger),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppColors.danger.withValues(alpha: .08),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: AppColors.danger.withValues(alpha: .35)),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Icon(Icons.error_outline, size: 18, color: AppColors.danger),
+                              const SizedBox(width: 8),
+                              Expanded(child: Text(_error!, style: const TextStyle(color: AppColors.danger))),
+                            ],
+                          ),
                         ),
                       ],
                       const SizedBox(height: 22),
@@ -126,15 +147,26 @@ class _LoginPageState extends State<LoginPage> {
                               )
                             : const Icon(Icons.login),
                         label: const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 14),
-                          child: Text('Entrar'),
+                          padding: EdgeInsets.symmetric(vertical: 3),
+                          child: Text('Entrar no sistema'),
                         ),
                       ),
-                      const SizedBox(height: 14),
-                      const Text(
-                        'Não existe cadastro público. Usuários são criados pelo administrador.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 12, color: AppColors.silverDark),
+                      const SizedBox(height: 18),
+                      const Divider(),
+                      const SizedBox(height: 12),
+                      const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.verified_user_outlined, size: 16, color: AppColors.silverDark),
+                          SizedBox(width: 7),
+                          Flexible(
+                            child: Text(
+                              'Acesso restrito a usuários autorizados.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontSize: 12, color: AppColors.silverDark),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
