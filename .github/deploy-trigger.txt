@@ -1,0 +1,1 @@
+Trigger de deploy após configuração dos secrets do Back4App.
