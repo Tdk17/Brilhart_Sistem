@@ -17,14 +17,19 @@ class ApiClient {
     defaultValue: 'https://parseapi.back4app.com',
   );
   static const applicationId = String.fromEnvironment('PARSE_APPLICATION_ID');
+  static const restApiKey = String.fromEnvironment('PARSE_REST_API_KEY');
   static const clientKey = String.fromEnvironment('PARSE_CLIENT_KEY');
 
   String? sessionToken;
 
   Map<String, String> get _headers => {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
         'X-Parse-Application-Id': applicationId,
-        if (clientKey.isNotEmpty) 'X-Parse-Client-Key': clientKey,
+        if (restApiKey.isNotEmpty)
+          'X-Parse-REST-API-Key': restApiKey
+        else if (clientKey.isNotEmpty)
+          'X-Parse-Client-Key': clientKey,
         if (sessionToken != null && sessionToken!.isNotEmpty)
           'X-Parse-Session-Token': sessionToken!,
       };
@@ -33,6 +38,11 @@ class ApiClient {
     if (applicationId.isEmpty) {
       throw const ApiException(
         'PARSE_APPLICATION_ID não configurado no build.',
+      );
+    }
+    if (restApiKey.isEmpty && clientKey.isEmpty) {
+      throw const ApiException(
+        'Chave do Back4App não configurada no build.',
       );
     }
   }
