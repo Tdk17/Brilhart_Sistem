@@ -84,7 +84,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       const SizedBox(height: 8),
                       const Text(
-                        'Uso interno BrilhArte Laqueamentos',
+                        'Uso interno Brilhart Laqueamentos',
                         textAlign: TextAlign.center,
                         style: TextStyle(color: AppColors.silverDark),
                       ),
