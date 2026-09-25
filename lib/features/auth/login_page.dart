@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/services/api_client.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/theme/app_theme.dart';
-import '../../core/widgets/brilhart_logo.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -19,6 +19,31 @@ class _LoginPageState extends State<LoginPage> {
   bool _busy = false;
   bool _hidePassword = true;
   String? _error;
+  String? _logoUrl;
+  String _tradeName = 'Brilhart Laqueamentos';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPublicBrand();
+  }
+
+  Future<void> _loadPublicBrand() async {
+    try {
+      final result =
+          await GetIt.I<ApiClient>().cloud('v1-company-brand-public');
+      if (!mounted) return;
+
+      final logoUrl = '${result['logoUrl'] ?? ''}'.trim();
+      final tradeName = '${result['tradeName'] ?? ''}'.trim();
+      setState(() {
+        _logoUrl = logoUrl.isEmpty ? null : logoUrl;
+        if (tradeName.isNotEmpty) _tradeName = tradeName;
+      });
+    } catch (_) {
+      // Branding é opcional: o login continua funcionando com o fallback local.
+    }
+  }
 
   Future<void> _submit() async {
     if (_email.text.trim().isEmpty || _password.text.isEmpty) {
@@ -44,6 +69,50 @@ class _LoginPageState extends State<LoginPage> {
     _email.dispose();
     _password.dispose();
     super.dispose();
+  }
+
+  Widget _brandLogo() {
+    final image = _logoUrl != null
+        ? Image.network(
+            _logoUrl!,
+            height: 112,
+            fit: BoxFit.contain,
+            filterQuality: FilterQuality.high,
+            errorBuilder: (_, __, ___) => _localLogo(),
+          )
+        : _localLogo();
+
+    return SizedBox(
+      height: 118,
+      child: Center(child: image),
+    );
+  }
+
+  Widget _localLogo() {
+    return Image.asset(
+      'assets/images/brilhart_logo.png',
+      height: 112,
+      fit: BoxFit.contain,
+      filterQuality: FilterQuality.high,
+      errorBuilder: (_, __, ___) => Container(
+        width: 64,
+        height: 64,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: AppColors.gold.withValues(alpha: .10),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: AppColors.gold.withValues(alpha: .35)),
+        ),
+        child: const Text(
+          'B',
+          style: TextStyle(
+            color: AppColors.gold,
+            fontSize: 28,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -80,18 +149,21 @@ class _LoginPageState extends State<LoginPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const Center(child: BrilhartLogo(height: 112)),
-                      const SizedBox(height: 24),
+                      _brandLogo(),
+                      const SizedBox(height: 18),
                       const Text(
                         'Acesso ao sistema',
                         textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
+                        style: TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                       const SizedBox(height: 8),
-                      const Text(
-                        'Gestão interna • Brilhart Laqueamentos',
+                      Text(
+                        'Gestão interna • $_tradeName',
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: AppColors.silverDark),
+                        style: const TextStyle(color: AppColors.silverDark),
                       ),
                       const SizedBox(height: 28),
                       TextField(
@@ -113,8 +185,14 @@ class _LoginPageState extends State<LoginPage> {
                           labelText: 'Senha',
                           prefixIcon: const Icon(Icons.lock_outline),
                           suffixIcon: IconButton(
-                            onPressed: () => setState(() => _hidePassword = !_hidePassword),
-                            icon: Icon(_hidePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+                            onPressed: () => setState(
+                              () => _hidePassword = !_hidePassword,
+                            ),
+                            icon: Icon(
+                              _hidePassword
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined,
+                            ),
                           ),
                         ),
                       ),
@@ -125,14 +203,27 @@ class _LoginPageState extends State<LoginPage> {
                           decoration: BoxDecoration(
                             color: AppColors.danger.withValues(alpha: .08),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: AppColors.danger.withValues(alpha: .35)),
+                            border: Border.all(
+                              color: AppColors.danger.withValues(alpha: .35),
+                            ),
                           ),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Icon(Icons.error_outline, size: 18, color: AppColors.danger),
+                              const Icon(
+                                Icons.error_outline,
+                                size: 18,
+                                color: AppColors.danger,
+                              ),
                               const SizedBox(width: 8),
-                              Expanded(child: Text(_error!, style: const TextStyle(color: AppColors.danger))),
+                              Expanded(
+                                child: Text(
+                                  _error!,
+                                  style: const TextStyle(
+                                    color: AppColors.danger,
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -143,7 +234,9 @@ class _LoginPageState extends State<LoginPage> {
                         icon: _busy
                             ? const SizedBox.square(
                                 dimension: 18,
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               )
                             : const Icon(Icons.login),
                         label: const Padding(
@@ -157,13 +250,20 @@ class _LoginPageState extends State<LoginPage> {
                       const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.verified_user_outlined, size: 16, color: AppColors.silverDark),
+                          Icon(
+                            Icons.verified_user_outlined,
+                            size: 16,
+                            color: AppColors.silverDark,
+                          ),
                           SizedBox(width: 7),
                           Flexible(
                             child: Text(
                               'Acesso restrito a usuários autorizados.',
                               textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: 12, color: AppColors.silverDark),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppColors.silverDark,
+                              ),
                             ),
                           ),
                         ],
