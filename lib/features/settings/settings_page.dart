@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
@@ -23,9 +26,12 @@ class _SettingsPageState extends State<SettingsPage> {
   final _pixKey = TextEditingController();
   final _paymentTerms = TextEditingController();
   final _footer = TextEditingController();
+
   bool loading = true;
   bool saving = false;
   Object? error;
+  String? _logoUrl;
+  PlatformFile? _logoFile;
 
   @override
   void initState() {
@@ -39,7 +45,8 @@ class _SettingsPageState extends State<SettingsPage> {
       error = null;
     });
     try {
-      final result = await GetIt.I<ApiClient>().cloud('v1-company-settings-get');
+      final result =
+          await GetIt.I<ApiClient>().cloud('v1-company-settings-get');
       _tradeName.text = '${result['tradeName'] ?? ''}';
       _legalName.text = '${result['legalName'] ?? ''}';
       _cnpj.text = '${result['cnpj'] ?? ''}';
@@ -50,6 +57,12 @@ class _SettingsPageState extends State<SettingsPage> {
       _pixKey.text = '${result['pixKey'] ?? ''}';
       _paymentTerms.text = '${result['paymentTerms'] ?? ''}';
       _footer.text = '${result['documentFooter'] ?? ''}';
+      if (mounted) {
+        setState(() {
+          _logoUrl = result['logoUrl']?.toString();
+          _logoFile = null;
+        });
+      }
     } catch (e) {
       if (mounted) setState(() => error = e);
     } finally {
@@ -57,11 +70,31 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
+  Future<void> _pickLogo() async {
+    final result = await FilePicker.platform.pickFiles(
+      allowMultiple: false,
+      type: FileType.image,
+      withData: true,
+    );
+    if (result == null || result.files.isEmpty) return;
+
+    final file = result.files.first;
+    if (file.bytes == null) {
+      _snack('Não foi possível ler a imagem selecionada.');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      _snack('A logo deve ter no máximo 5 MB.');
+      return;
+    }
+    setState(() => _logoFile = file);
+  }
+
   Future<void> _save() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     setState(() => saving = true);
     try {
-      await GetIt.I<ApiClient>().cloud('v1-company-settings-update', {
+      final payload = <String, dynamic>{
         'tradeName': _tradeName.text.trim(),
         'legalName': _legalName.text.trim(),
         'cnpj': _cnpj.text.trim(),
@@ -72,16 +105,25 @@ class _SettingsPageState extends State<SettingsPage> {
         'pixKey': _pixKey.text.trim(),
         'paymentTerms': _paymentTerms.text.trim(),
         'documentFooter': _footer.text.trim(),
+      };
+
+      if (_logoFile?.bytes != null) {
+        payload['logo'] = {
+          'name': _logoFile!.name,
+          'base64': base64Encode(_logoFile!.bytes!),
+        };
+      }
+
+      final result = await GetIt.I<ApiClient>()
+          .cloud('v1-company-settings-update', payload);
+      if (!mounted) return;
+      setState(() {
+        _logoUrl = result['logoUrl']?.toString() ?? _logoUrl;
+        _logoFile = null;
       });
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Configurações salvas.')),
-      );
+      _snack('Configurações salvas.');
     } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao salvar: $e')),
-      );
+      _snack('Erro ao salvar: $e');
     } finally {
       if (mounted) setState(() => saving = false);
     }
@@ -130,7 +172,8 @@ class _SettingsPageState extends State<SettingsPage> {
               padding: const EdgeInsets.all(24),
               child: Column(
                 children: [
-                  const Icon(Icons.cloud_off_outlined, color: AppColors.gold, size: 42),
+                  const Icon(Icons.cloud_off_outlined,
+                      color: AppColors.gold, size: 42),
                   const SizedBox(height: 10),
                   Text('$error', textAlign: TextAlign.center),
                   const SizedBox(height: 12),
@@ -152,11 +195,10 @@ class _SettingsPageState extends State<SettingsPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          width: 110,
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final preview = Container(
+                          width: 140,
                           height: 110,
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
@@ -164,31 +206,77 @@ class _SettingsPageState extends State<SettingsPage> {
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(color: Colors.white12),
                           ),
-                          child: Image.asset(
-                            'assets/images/brilhart_logo.png',
-                            fit: BoxFit.contain,
-                          ),
-                        ),
-                        const SizedBox(width: 18),
-                        const Expanded(
-                          child: Padding(
-                            padding: EdgeInsets.only(top: 12),
-                            child: Text(
-                              'A identidade visual oficial da BrilhArte é usada no sistema e nos documentos. A troca de arquivo da logo pode ser adicionada ao backend mantendo estes dados da empresa.',
+                          child: _logoFile?.bytes != null
+                              ? Image.memory(_logoFile!.bytes!, fit: BoxFit.contain)
+                              : (_logoUrl != null && _logoUrl!.isNotEmpty)
+                                  ? Image.network(
+                                      _logoUrl!,
+                                      fit: BoxFit.contain,
+                                      errorBuilder: (_, __, ___) => Image.asset(
+                                        'assets/images/brilhart_logo.png',
+                                        fit: BoxFit.contain,
+                                      ),
+                                    )
+                                  : Image.asset(
+                                      'assets/images/brilhart_logo.png',
+                                      fit: BoxFit.contain,
+                                    ),
+                        );
+                        final info = Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Logo da empresa',
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.w700),
+                            ),
+                            const SizedBox(height: 6),
+                            const Text(
+                              'Usada no sistema e nos documentos gerados. Formatos de imagem comuns, até 5 MB.',
                               style: TextStyle(color: AppColors.silverDark),
                             ),
-                          ),
-                        ),
-                      ],
+                            const SizedBox(height: 10),
+                            OutlinedButton.icon(
+                              onPressed: saving ? null : _pickLogo,
+                              icon: const Icon(Icons.upload_outlined),
+                              label: Text(_logoFile == null
+                                  ? 'Trocar logo'
+                                  : _logoFile!.name),
+                            ),
+                          ],
+                        );
+
+                        if (constraints.maxWidth < 620) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              preview,
+                              const SizedBox(height: 14),
+                              info,
+                            ],
+                          );
+                        }
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            preview,
+                            const SizedBox(width: 18),
+                            Expanded(child: info),
+                          ],
+                        );
+                      },
                     ),
                     const SizedBox(height: 22),
                     _field(_tradeName, 'Nome comercial', required: true),
                     _field(_legalName, 'Razão social'),
                     _field(_cnpj, 'CNPJ'),
                     _field(_address, 'Endereço'),
-                    _field(_email, 'E-mail', keyboardType: TextInputType.emailAddress),
-                    _field(_phone, 'Telefone', keyboardType: TextInputType.phone),
-                    _field(_whatsapp, 'WhatsApp comercial', keyboardType: TextInputType.phone),
+                    _field(_email, 'E-mail',
+                        keyboardType: TextInputType.emailAddress),
+                    _field(_phone, 'Telefone',
+                        keyboardType: TextInputType.phone),
+                    _field(_whatsapp, 'WhatsApp comercial',
+                        keyboardType: TextInputType.phone),
                     _field(_pixKey, 'Chave Pix'),
                     _field(
                       _paymentTerms,
@@ -248,5 +336,12 @@ class _SettingsPageState extends State<SettingsPage> {
         decoration: InputDecoration(labelText: label),
       ),
     );
+  }
+
+  void _snack(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
   }
 }
