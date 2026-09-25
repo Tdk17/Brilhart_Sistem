@@ -141,7 +141,7 @@ class _QuoteRequestPageState extends State<QuoteRequestPage> {
           ),
           const SizedBox(height: 8),
           const Text(
-            'A BrilhArte recebeu seus dados. Esta solicitação ainda não é um orçamento oficial; nossa equipe entrará em contato para dar continuidade.',
+            'A Brilhart recebeu seus dados. Esta solicitação ainda não é um orçamento oficial; nossa equipe entrará em contato para dar continuidade.',
             textAlign: TextAlign.center,
             style: TextStyle(color: AppColors.silverDark),
           ),
@@ -177,7 +177,7 @@ class _QuoteRequestPageState extends State<QuoteRequestPage> {
             ),
             const SizedBox(height: 6),
             const Text(
-              'Envie as informações do serviço. A equipe da BrilhArte analisará a solicitação antes de gerar o orçamento oficial.',
+              'Envie as informações do serviço. A equipe da Brilhart analisará a solicitação antes de gerar o orçamento oficial.',
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColors.silverDark),
             ),
