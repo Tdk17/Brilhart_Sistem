@@ -30,9 +30,9 @@ class ApiClient {
       };
 
   Future<Map<String, dynamic>> cloud(
-    String function,
-    [Map<String, dynamic> payload = const {}],
-  ) async {
+    String function, [
+    Map<String, dynamic> payload = const {},
+  ]) async {
     if (applicationId.isEmpty) {
       throw const ApiException(
         'PARSE_APPLICATION_ID não configurado no build.',
