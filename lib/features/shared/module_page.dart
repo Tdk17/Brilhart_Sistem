@@ -1,7 +1,11 @@
+import 'dart:convert';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
 import '../../core/services/api_client.dart';
+import '../../core/services/external_links.dart';
 import '../../core/theme/app_theme.dart';
 
 enum ModuleFieldType { text, multiline, phone, number, money, date, file }
@@ -95,6 +99,12 @@ class _ModulePageState extends State<ModulePage> {
     _load();
   }
 
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+
   Future<void> _load() async {
     setState(() {
       loading = true;
@@ -112,12 +122,6 @@ class _ModulePageState extends State<ModulePage> {
     } finally {
       if (mounted) setState(() => loading = false);
     }
-  }
-
-  @override
-  void dispose() {
-    _search.dispose();
-    super.dispose();
   }
 
   String _idOf(Map<String, dynamic> item) =>
@@ -141,18 +145,12 @@ class _ModulePageState extends State<ModulePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      widget.title,
-                      style: const TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
+                    Text(widget.title,
+                        style: const TextStyle(
+                            fontSize: 30, fontWeight: FontWeight.w800)),
                     const SizedBox(height: 6),
-                    Text(
-                      widget.subtitle,
-                      style: const TextStyle(color: AppColors.silverDark),
-                    ),
+                    Text(widget.subtitle,
+                        style: const TextStyle(color: AppColors.silverDark)),
                   ],
                 ),
               ),
@@ -181,10 +179,8 @@ class _ModulePageState extends State<ModulePage> {
               child: Padding(
                 padding: EdgeInsets.all(36),
                 child: Center(
-                  child: Text(
-                    'Nenhum registro encontrado.',
-                    style: TextStyle(color: AppColors.silverDark),
-                  ),
+                  child: Text('Nenhum registro encontrado.',
+                      style: TextStyle(color: AppColors.silverDark)),
                 ),
               ),
             )
@@ -215,7 +211,7 @@ class _ModulePageState extends State<ModulePage> {
               ),
             );
             final status = DropdownButtonFormField<String>(
-              value: _status,
+              initialValue: _status,
               decoration: const InputDecoration(
                 labelText: 'Status',
                 prefixIcon: Icon(Icons.filter_alt_outlined),
@@ -253,60 +249,44 @@ class _ModulePageState extends State<ModulePage> {
                 children: [
                   search,
                   const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Expanded(child: status),
-                      const SizedBox(width: 10),
-                      refresh,
-                    ],
-                  ),
+                  Row(children: [
+                    Expanded(child: status),
+                    const SizedBox(width: 10),
+                    refresh,
+                  ]),
                 ],
               );
             }
-
-            return Row(
-              children: [
-                Expanded(flex: 3, child: search),
-                const SizedBox(width: 10),
-                Expanded(child: status),
-                const SizedBox(width: 10),
-                refresh,
-              ],
-            );
+            return Row(children: [
+              Expanded(flex: 3, child: search),
+              const SizedBox(width: 10),
+              Expanded(child: status),
+              const SizedBox(width: 10),
+              refresh,
+            ]);
           },
         ),
       ),
     );
   }
 
-  Widget _errorCard() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
-            const Icon(
-              Icons.cloud_off_outlined,
-              color: AppColors.gold,
-              size: 42,
-            ),
+  Widget _errorCard() => Card(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(children: [
+            const Icon(Icons.cloud_off_outlined,
+                color: AppColors.gold, size: 42),
             const SizedBox(height: 10),
-            Text(
-              '$error',
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: AppColors.silverDark),
-            ),
+            Text('$error', textAlign: TextAlign.center),
             const SizedBox(height: 12),
             OutlinedButton.icon(
               onPressed: _load,
               icon: const Icon(Icons.refresh),
               label: const Text('Tentar novamente'),
             ),
-          ],
+          ]),
         ),
-      ),
-    );
-  }
+      );
 
   Widget _recordCard(Map<String, dynamic> item) {
     final title = item['name'] ??
@@ -333,10 +313,8 @@ class _ModulePageState extends State<ModulePage> {
             backgroundColor: Color(0xFF2A2412),
             child: Icon(Icons.folder_open_outlined, color: AppColors.gold),
           ),
-          title: Text(
-            '$title',
-            style: const TextStyle(fontWeight: FontWeight.w700),
-          ),
+          title: Text('$title',
+              style: const TextStyle(fontWeight: FontWeight.w700)),
           subtitle: Text('$subtitle'),
           trailing: Wrap(
             spacing: 8,
@@ -367,26 +345,23 @@ class _ModulePageState extends State<ModulePage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 ...item.entries
-                    .where((entry) => !entry.key.startsWith('_'))
-                    .map(
-                      (entry) => Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              entry.key,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: AppColors.silverDark,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text('${entry.value}'),
-                          ],
-                        ),
-                      ),
-                    ),
+                    .where((entry) =>
+                        !entry.key.startsWith('_') &&
+                        !entry.key.toLowerCase().contains('base64'))
+                    .map((entry) => Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(entry.key,
+                                  style: const TextStyle(
+                                      fontSize: 12,
+                                      color: AppColors.silverDark)),
+                              const SizedBox(height: 2),
+                              Text('${entry.value}'),
+                            ],
+                          ),
+                        )),
                 if (widget.actions.isNotEmpty) ...[
                   const Divider(),
                   const SizedBox(height: 8),
@@ -436,14 +411,16 @@ class _ModulePageState extends State<ModulePage> {
   }
 
   Future<void> _runAction(
-    ModuleAction action,
-    Map<String, dynamic> item,
-  ) async {
+      ModuleAction action, Map<String, dynamic> item) async {
     if (action.type == ModuleActionType.whatsapp) {
-      final phone = item['phone'] ?? item['whatsapp'] ?? item['clientPhone'];
-      _snack(phone == null || '$phone'.isEmpty
-          ? 'Registro sem WhatsApp.'
-          : 'WhatsApp do cliente: $phone');
+      final phone =
+          '${item['phone'] ?? item['whatsapp'] ?? item['clientPhone'] ?? ''}';
+      if (phone.trim().isEmpty) {
+        _snack('Registro sem WhatsApp.');
+        return;
+      }
+      final opened = await ExternalLinks.openWhatsApp(phone);
+      if (!opened) _snack('Não foi possível abrir o WhatsApp.');
       return;
     }
 
@@ -455,13 +432,11 @@ class _ModulePageState extends State<ModulePage> {
               content: Text(action.confirmMessage!),
               actions: [
                 TextButton(
-                  onPressed: () => Navigator.pop(ctx, false),
-                  child: const Text('Cancelar'),
-                ),
+                    onPressed: () => Navigator.pop(ctx, false),
+                    child: const Text('Cancelar')),
                 FilledButton(
-                  onPressed: () => Navigator.pop(ctx, true),
-                  child: const Text('Confirmar'),
-                ),
+                    onPressed: () => Navigator.pop(ctx, true),
+                    child: const Text('Confirmar')),
               ],
             ),
           ) ??
@@ -475,8 +450,16 @@ class _ModulePageState extends State<ModulePage> {
         ...action.payload,
       });
       if (action.openReturnedUrl) {
-        final url = result['url'] ?? result['pdfUrl'] ?? result['downloadUrl'];
-        _snack(url == null ? 'Documento gerado.' : 'Documento: $url');
+        final url = result['url'] ??
+            result['pdfUrl'] ??
+            result['downloadUrl'] ??
+            result['fileUrl'];
+        if (url == null || '$url'.isEmpty) {
+          _snack('Documento gerado, mas o backend não retornou a URL.');
+        } else {
+          final opened = await ExternalLinks.openUrl('$url');
+          if (!opened) _snack('Não foi possível abrir o documento.');
+        }
       } else {
         _snack('${action.label} concluído.');
       }
@@ -489,10 +472,13 @@ class _ModulePageState extends State<ModulePage> {
   Future<void> _showForm({Map<String, dynamic>? item}) async {
     final editing = item != null;
     final controllers = <String, TextEditingController>{};
+    final files = <String, PlatformFile>{};
     for (final field in widget.fields) {
-      controllers[field.key] = TextEditingController(
-        text: item?[field.key]?.toString() ?? '',
-      );
+      if (field.type != ModuleFieldType.file) {
+        controllers[field.key] = TextEditingController(
+          text: item?[field.key]?.toString() ?? '',
+        );
+      }
     }
     final formKey = GlobalKey<FormState>();
     bool saving = false;
@@ -502,15 +488,53 @@ class _ModulePageState extends State<ModulePage> {
       barrierDismissible: false,
       builder: (dialogContext) => StatefulBuilder(
         builder: (dialogContext, setLocalState) {
+          Future<void> chooseFile(ModuleField field) async {
+            final result = await FilePicker.platform.pickFiles(
+              allowMultiple: false,
+              withData: true,
+            );
+            if (result == null || result.files.isEmpty) return;
+            final file = result.files.first;
+            if (file.bytes == null) {
+              _snack('Não foi possível ler o arquivo selecionado.');
+              return;
+            }
+            if (file.size > 12 * 1024 * 1024) {
+              _snack('Arquivo muito grande. Limite: 12 MB.');
+              return;
+            }
+            setLocalState(() => files[field.key] = file);
+          }
+
           Future<void> save() async {
             if (!(formKey.currentState?.validate() ?? false)) return;
+            for (final field in widget.fields.where((field) =>
+                field.type == ModuleFieldType.file && field.required)) {
+              if (!editing && files[field.key] == null) {
+                _snack('Selecione ${field.label}.');
+                return;
+              }
+            }
+
             setLocalState(() => saving = true);
             try {
               final payload = <String, dynamic>{
                 if (editing) 'id': _idOf(item),
-                for (final field in widget.fields)
-                  field.key: controllers[field.key]!.text.trim(),
               };
+              for (final field in widget.fields) {
+                if (field.type == ModuleFieldType.file) {
+                  final file = files[field.key];
+                  if (file != null && file.bytes != null) {
+                    payload[field.key] = {
+                      'name': file.name,
+                      'base64': base64Encode(file.bytes!),
+                    };
+                  }
+                } else {
+                  payload[field.key] = controllers[field.key]!.text.trim();
+                }
+              }
+
               await GetIt.I<ApiClient>().cloud(
                 editing ? widget.updateFunction! : widget.createFunction!,
                 payload,
@@ -537,26 +561,40 @@ class _ModulePageState extends State<ModulePage> {
                   child: Column(
                     children: [
                       for (final field in widget.fields) ...[
-                        TextFormField(
-                          controller: controllers[field.key],
-                          minLines:
-                              field.type == ModuleFieldType.multiline ? 3 : 1,
-                          maxLines:
-                              field.type == ModuleFieldType.multiline ? 6 : 1,
-                          keyboardType: field.type == ModuleFieldType.phone
-                              ? TextInputType.phone
-                              : (field.type == ModuleFieldType.number ||
-                                      field.type == ModuleFieldType.money)
-                                  ? const TextInputType.numberWithOptions(
-                                      decimal: true)
-                                  : TextInputType.text,
-                          validator: field.required
-                              ? (value) => value == null || value.trim().isEmpty
-                                  ? 'Campo obrigatório.'
-                                  : null
-                              : null,
-                          decoration: InputDecoration(labelText: field.label),
-                        ),
+                        if (field.type == ModuleFieldType.file)
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: OutlinedButton.icon(
+                              onPressed:
+                                  saving ? null : () => chooseFile(field),
+                              icon: const Icon(Icons.attach_file),
+                              label:
+                                  Text(files[field.key]?.name ?? field.label),
+                            ),
+                          )
+                        else
+                          TextFormField(
+                            controller: controllers[field.key],
+                            minLines: field.type == ModuleFieldType.multiline
+                                ? 3
+                                : 1,
+                            maxLines: field.type == ModuleFieldType.multiline
+                                ? 6
+                                : 1,
+                            keyboardType: _keyboardType(field.type),
+                            validator: field.required
+                                ? (value) =>
+                                    value == null || value.trim().isEmpty
+                                        ? 'Campo obrigatório.'
+                                        : null
+                                : null,
+                            decoration: InputDecoration(
+                              labelText: field.label,
+                              suffixIcon: field.type == ModuleFieldType.date
+                                  ? const Icon(Icons.event_outlined)
+                                  : null,
+                            ),
+                          ),
                         const SizedBox(height: 12),
                       ],
                     ],
@@ -590,23 +628,32 @@ class _ModulePageState extends State<ModulePage> {
     }
   }
 
+  TextInputType _keyboardType(ModuleFieldType type) {
+    switch (type) {
+      case ModuleFieldType.phone:
+        return TextInputType.phone;
+      case ModuleFieldType.number:
+      case ModuleFieldType.money:
+        return const TextInputType.numberWithOptions(decimal: true);
+      default:
+        return TextInputType.text;
+    }
+  }
+
   Future<void> _delete(Map<String, dynamic> item) async {
     final confirmed = await showDialog<bool>(
           context: context,
           builder: (ctx) => AlertDialog(
             title: const Text('Excluir registro'),
             content: const Text(
-              'Confirma a exclusão? As regras do backend ainda serão aplicadas.',
-            ),
+                'Confirma a exclusão? As regras do backend ainda serão aplicadas.'),
             actions: [
               TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Cancelar'),
-              ),
+                  onPressed: () => Navigator.pop(ctx, false),
+                  child: const Text('Cancelar')),
               FilledButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Excluir'),
-              ),
+                  onPressed: () => Navigator.pop(ctx, true),
+                  child: const Text('Excluir')),
             ],
           ),
         ) ??
