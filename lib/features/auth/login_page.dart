@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/services/api_client.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/theme/app_theme.dart';
 
@@ -19,31 +18,6 @@ class _LoginPageState extends State<LoginPage> {
   bool _busy = false;
   bool _hidePassword = true;
   String? _error;
-  String? _logoUrl;
-  String _tradeName = 'Brilhart Laqueamentos';
-
-  @override
-  void initState() {
-    super.initState();
-    _loadPublicBrand();
-  }
-
-  Future<void> _loadPublicBrand() async {
-    try {
-      final result =
-          await GetIt.I<ApiClient>().cloud('v1-company-brand-public');
-      if (!mounted) return;
-
-      final logoUrl = '${result['logoUrl'] ?? ''}'.trim();
-      final tradeName = '${result['tradeName'] ?? ''}'.trim();
-      setState(() {
-        _logoUrl = logoUrl.isEmpty ? null : logoUrl;
-        if (tradeName.isNotEmpty) _tradeName = tradeName;
-      });
-    } catch (_) {
-      // Branding é opcional: o login continua funcionando com o fallback local.
-    }
-  }
 
   Future<void> _submit() async {
     if (_email.text.trim().isEmpty || _password.text.isEmpty) {
@@ -69,50 +43,6 @@ class _LoginPageState extends State<LoginPage> {
     _email.dispose();
     _password.dispose();
     super.dispose();
-  }
-
-  Widget _brandLogo() {
-    final image = _logoUrl != null
-        ? Image.network(
-            _logoUrl!,
-            height: 112,
-            fit: BoxFit.contain,
-            filterQuality: FilterQuality.high,
-            errorBuilder: (_, __, ___) => _localLogo(),
-          )
-        : _localLogo();
-
-    return SizedBox(
-      height: 118,
-      child: Center(child: image),
-    );
-  }
-
-  Widget _localLogo() {
-    return Image.asset(
-      'assets/images/brilhart_logo.png',
-      height: 112,
-      fit: BoxFit.contain,
-      filterQuality: FilterQuality.high,
-      errorBuilder: (_, __, ___) => Container(
-        width: 64,
-        height: 64,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: AppColors.gold.withValues(alpha: .10),
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: AppColors.gold.withValues(alpha: .35)),
-        ),
-        child: const Text(
-          'B',
-          style: TextStyle(
-            color: AppColors.gold,
-            fontSize: 28,
-            fontWeight: FontWeight.w900,
-          ),
-        ),
-      ),
-    );
   }
 
   @override
@@ -149,23 +79,23 @@ class _LoginPageState extends State<LoginPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _brandLogo(),
-                      const SizedBox(height: 18),
                       const Text(
-                        'Acesso ao sistema',
+                        'Brilhart Acesso',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.w800,
+                          fontSize: 32,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -.4,
+                          color: AppColors.white,
                         ),
                       ),
                       const SizedBox(height: 8),
-                      Text(
-                        'Gestão interna • $_tradeName',
+                      const Text(
+                        'Gestão interna • Brilhart Laqueamentos',
                         textAlign: TextAlign.center,
-                        style: const TextStyle(color: AppColors.silverDark),
+                        style: TextStyle(color: AppColors.silverDark),
                       ),
-                      const SizedBox(height: 28),
+                      const SizedBox(height: 30),
                       TextField(
                         controller: _email,
                         keyboardType: TextInputType.emailAddress,
@@ -219,9 +149,7 @@ class _LoginPageState extends State<LoginPage> {
                               Expanded(
                                 child: Text(
                                   _error!,
-                                  style: const TextStyle(
-                                    color: AppColors.danger,
-                                  ),
+                                  style: const TextStyle(color: AppColors.danger),
                                 ),
                               ),
                             ],
@@ -234,9 +162,7 @@ class _LoginPageState extends State<LoginPage> {
                         icon: _busy
                             ? const SizedBox.square(
                                 dimension: 18,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
+                                child: CircularProgressIndicator(strokeWidth: 2),
                               )
                             : const Icon(Icons.login),
                         label: const Padding(
