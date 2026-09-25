@@ -37,12 +37,23 @@ jobs:
         run: flutter analyze --no-fatal-infos
 
       - name: Build web
-        run: >-
-          flutter build web --release
-          --base-href "/Brilhart_Sistem/"
-          --dart-define=APP_ENV=production
-          --dart-define=PARSE_APPLICATION_ID="${{ secrets.PARSE_APPLICATION_ID }}"
-          --dart-define=PARSE_CLIENT_KEY="${{ secrets.PARSE_CLIENT_KEY }}"
+        env:
+          PARSE_APPLICATION_ID: ${{ secrets.PARSE_APPLICATION_ID || vars.PARSE_APPLICATION_ID }}
+          PARSE_CLIENT_KEY: ${{ secrets.PARSE_CLIENT_KEY || vars.PARSE_CLIENT_KEY }}
+        run: |
+          if [ -z "$PARSE_APPLICATION_ID" ]; then
+            echo "::error::PARSE_APPLICATION_ID não configurado em Secrets nem Variables."
+            exit 1
+          fi
+          if [ -z "$PARSE_CLIENT_KEY" ]; then
+            echo "::error::PARSE_CLIENT_KEY não configurado em Secrets nem Variables."
+            exit 1
+          fi
+          flutter build web --release \
+            --base-href "/Brilhart_Sistem/" \
+            --dart-define=APP_ENV=production \
+            --dart-define=PARSE_APPLICATION_ID="$PARSE_APPLICATION_ID" \
+            --dart-define=PARSE_CLIENT_KEY="$PARSE_CLIENT_KEY"
 
       - name: SPA fallback and no Jekyll
         run: |
