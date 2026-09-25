@@ -42,7 +42,7 @@ class AppShell extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 10),
-              const Text('BrilhArte Sistem'),
+              const Text('Brilhart Sistem'),
             ],
           ),
         ),
