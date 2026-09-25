@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/services/auth_service.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/widgets/brilhart_logo.dart';
 
 class AppShell extends StatelessWidget {
   const AppShell({super.key, required this.child});
@@ -31,24 +32,29 @@ class AppShell extends StatelessWidget {
       return Scaffold(
         appBar: AppBar(
           backgroundColor: AppColors.black,
-          title: Row(
+          titleSpacing: 12,
+          title: const Row(
             children: [
-              Image.asset(
-                'assets/images/brilhart_logo.png',
-                height: 34,
-                errorBuilder: (_, __, ___) => const Icon(
-                  Icons.format_paint,
-                  color: AppColors.gold,
-                ),
-              ),
-              const SizedBox(width: 10),
-              const Text('Brilhart Sistem'),
+              BrilhartLogo(height: 34, width: 110),
+              SizedBox(width: 10),
+              Text('Brilhart Sistem', style: TextStyle(fontWeight: FontWeight.w700)),
             ],
           ),
         ),
         drawer: Drawer(
           backgroundColor: AppColors.surface,
-          child: SafeArea(child: _Menu(items: _items)),
+          child: SafeArea(
+            child: Column(
+              children: [
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(18, 22, 18, 16),
+                  child: BrilhartLogo(height: 86),
+                ),
+                const Divider(height: 1),
+                Expanded(child: _Menu(items: _items)),
+              ],
+            ),
+          ),
         ),
         body: child,
       );
@@ -58,25 +64,35 @@ class AppShell extends StatelessWidget {
       body: Row(
         children: [
           SizedBox(
-            width: 270,
-            child: ColoredBox(
-              color: AppColors.surface,
+            width: 286,
+            child: DecoratedBox(
+              decoration: const BoxDecoration(
+                color: AppColors.surface,
+                border: Border(right: BorderSide(color: AppColors.border)),
+              ),
               child: SafeArea(
                 child: Column(
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(22, 20, 22, 18),
-                      child: Image.asset(
-                        'assets/images/brilhart_logo.png',
-                        height: 86,
-                        fit: BoxFit.contain,
-                        errorBuilder: (_, __, ___) => const Icon(
-                          Icons.format_paint,
-                          size: 56,
-                          color: AppColors.gold,
+                    const Padding(
+                      padding: EdgeInsets.fromLTRB(24, 24, 24, 18),
+                      child: BrilhartLogo(height: 92),
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 22),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'GESTÃO OPERACIONAL',
+                          style: TextStyle(
+                            fontSize: 10,
+                            letterSpacing: 1.5,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.silverDark,
+                          ),
                         ),
                       ),
                     ),
+                    const SizedBox(height: 14),
                     const Divider(height: 1),
                     Expanded(child: _Menu(items: _items)),
                   ],
@@ -84,7 +100,6 @@ class AppShell extends StatelessWidget {
               ),
             ),
           ),
-          const VerticalDivider(width: 1),
           Expanded(child: child),
         ],
       ),
@@ -111,12 +126,13 @@ class _Menu extends StatelessWidget {
               final item = items[index];
               final selected = location == item.path;
               return ListTile(
+                minTileHeight: 50,
                 selected: selected,
                 selectedColor: AppColors.gold,
                 selectedTileColor: const Color(0xFF211C0D),
                 iconColor: selected ? AppColors.gold : AppColors.silver,
                 textColor: selected ? AppColors.gold : AppColors.silver,
-                leading: Icon(item.icon),
+                leading: Icon(item.icon, size: 21),
                 title: Text(
                   item.label,
                   style: TextStyle(
@@ -143,6 +159,7 @@ class _Menu extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.all(14),
           child: ListTile(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             leading: const Icon(Icons.logout, color: AppColors.silver),
             title: const Text('Sair'),
             onTap: () async {
