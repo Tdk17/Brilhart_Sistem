@@ -1,6 +1,6 @@
-# BrilhArte Sistem
+# Brilhart Sistem
 
-Sistema interno **Web/PWA** da BrilhArte Laqueamentos, construído em Flutter Web seguindo o padrão dos projetos CormeX: `get_it`, `go_router`, `signals`, integração real com Parse/Back4App e sem dados mockados.
+Sistema interno **Web/PWA** da Brilhart Laqueamentos, construído em Flutter Web seguindo o padrão dos projetos CormeX: `get_it`, `go_router`, `signals`, integração real com Parse/Back4App e sem dados mockados.
 
 ## Acesso Web
 
@@ -33,7 +33,7 @@ Solicitação pública de orçamento:
 
 ## Identidade visual
 
-Tema corporativo **preto, prata e dourado**. A logo oficial da BrilhArte está em `assets/images/brilhart_logo.png` e também foi preparada para favicon e ícones da PWA.
+Tema corporativo **preto, prata e dourado**. A logo oficial da Brilhart está em `assets/images/brilhart_logo.png` e também foi preparada para favicon e ícones da PWA.
 
 ## Arquitetura
 
@@ -59,7 +59,7 @@ docs/
 
 ## Backend / Back4App
 
-O frontend não usa mocks. As Cloud Functions e classes esperadas estão documentadas em:
+O frontend não usa mocks. A autenticação usa a sessão nativa do Parse/Back4App. As Cloud Functions e classes esperadas para os módulos operacionais estão documentadas em:
 
 `docs/API_CONTRACT.md`
 
@@ -103,4 +103,4 @@ E mantenha o GitHub Pages configurado para **GitHub Actions** como fonte de publ
 
 ## Regra de projeto
 
-Este é um sistema novo e independente. O aplicativo BrilhArte existente não deve ser alterado por este projeto.
+Este é um sistema novo e independente. O aplicativo Brilhart existente não deve ser alterado por este projeto.
