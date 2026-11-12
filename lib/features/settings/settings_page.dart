@@ -155,11 +155,11 @@ class _SettingsPageState extends State<SettingsPage> {
               width: 52,
               height: 52,
               decoration: BoxDecoration(
-                color: AppColors.gold.withValues(alpha: .12),
+                color: AppColors.primary.withValues(alpha: .12),
                 borderRadius: BorderRadius.circular(15),
-                border: Border.all(color: AppColors.gold.withValues(alpha: .32)),
+                border: Border.all(color: AppColors.primary.withValues(alpha: .32)),
               ),
-              child: const Icon(Icons.settings_outlined, color: AppColors.gold),
+              child: const Icon(Icons.settings_outlined, color: AppColors.primary),
             ),
             const SizedBox(width: 16),
             const Expanded(
@@ -170,7 +170,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   SizedBox(height: 6),
                   Text(
                     'Identidade, dados comerciais e informações usadas em documentos.',
-                    style: TextStyle(color: AppColors.silverDark),
+                    style: TextStyle(color: AppColors.textMuted),
                   ),
                 ],
               ),
@@ -222,7 +222,7 @@ class _SettingsPageState extends State<SettingsPage> {
             height: 132,
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppColors.black,
+              color: AppColors.background,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: AppColors.border),
             ),
@@ -334,13 +334,13 @@ class _SettingsPageState extends State<SettingsPage> {
         children: [
           Row(
             children: [
-              Icon(icon, color: AppColors.gold, size: 21),
+              Icon(icon, color: AppColors.primary, size: 21),
               const SizedBox(width: 10),
               Expanded(child: Text(title, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800))),
             ],
           ),
           const SizedBox(height: 5),
-          Text(subtitle, style: const TextStyle(color: AppColors.silverDark)),
+          Text(subtitle, style: const TextStyle(color: AppColors.textMuted)),
           const SizedBox(height: 18),
           child,
         ],
@@ -355,7 +355,7 @@ class _SettingsPageState extends State<SettingsPage> {
           borderRadius: BorderRadius.circular(18),
           border: Border.all(color: AppColors.border),
         ),
-        child: Column(children: [icon, const SizedBox(height: 14), Text(text, style: const TextStyle(color: AppColors.silverDark))]),
+        child: Column(children: [icon, const SizedBox(height: 14), Text(text, style: const TextStyle(color: AppColors.textMuted))]),
       );
 
   Widget _errorCard() => Container(

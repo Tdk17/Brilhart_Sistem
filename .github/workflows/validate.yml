@@ -1,0 +1,38 @@
+name: Validate Brilhart
+on:
+  push:
+    branches: ['feat/**']
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: validate-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm test --prefix cloud
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter analyze --no-fatal-infos
+      - run: flutter test
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: brilhart-ui-previews
+          path: build/ui-previews
+          if-no-files-found: ignore
+      - run: flutter build web --release --base-href /Brilhart_Sistem/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: brilhart-web-preview
+          path: build/web

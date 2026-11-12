@@ -1,0 +1,15 @@
+{
+  "enabled": false,
+  "namespace": "brilhart",
+  "environment": "homologacao",
+  "mode": "national",
+  "issuer": {
+    "cnpj": "",
+    "legalName": "",
+    "municipalityCode": "",
+    "municipalRegistration": ""
+  },
+  "series": 1,
+  "lastDpsNumber": 0,
+  "profiles": []
+}

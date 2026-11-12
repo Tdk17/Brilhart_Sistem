@@ -26,7 +26,7 @@ class BrilhartLogo extends StatelessWidget {
         child: const Center(
           child: Icon(
             Icons.format_paint_outlined,
-            color: Color(0xFFD4AF37),
+            color: Color(0xFF6CA9FF),
             size: 36,
           ),
         ),

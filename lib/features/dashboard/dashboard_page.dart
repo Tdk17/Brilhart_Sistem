@@ -101,7 +101,7 @@ class _DashboardPageState extends State<DashboardPage> {
               Text(
                 'Central de Operações',
                 style: TextStyle(
-                  color: AppColors.gold,
+                  color: AppColors.primary,
                   fontSize: 12,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.1,
@@ -115,7 +115,7 @@ class _DashboardPageState extends State<DashboardPage> {
               SizedBox(height: 5),
               Text(
                 'Visão consolidada da operação, produção e desempenho comercial da Brilhart.',
-                style: TextStyle(color: AppColors.silverDark),
+                style: TextStyle(color: AppColors.textMuted),
               ),
             ],
           ),
@@ -143,10 +143,10 @@ class _DashboardPageState extends State<DashboardPage> {
         gradient: const LinearGradient(
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
-          colors: [Color(0xFF17140C), Color(0xFF0F0F0F)],
+          colors: [Color(0xFF18365B), Color(0xFF142338)],
         ),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.gold.withValues(alpha: .24)),
+        border: Border.all(color: AppColors.primary.withValues(alpha: .24)),
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -164,12 +164,12 @@ class _DashboardPageState extends State<DashboardPage> {
                     width: 42,
                     height: 42,
                     decoration: BoxDecoration(
-                      color: AppColors.gold.withValues(alpha: .12),
+                      color: AppColors.primary.withValues(alpha: .12),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Icon(
                       Icons.monitor_heart_outlined,
-                      color: AppColors.gold,
+                      color: AppColors.primary,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -194,8 +194,8 @@ class _DashboardPageState extends State<DashboardPage> {
               ),
               const SizedBox(height: 5),
               const Text(
-                'Indicadores atualizados diretamente pelo backend de produção.',
-                style: TextStyle(color: AppColors.silverDark),
+                'Priorize entregas, acompanhe solicitações e mantenha a operação em dia.',
+                style: TextStyle(color: AppColors.textMuted),
               ),
             ],
           );
@@ -325,13 +325,13 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
             child: const Row(
               children: [
-                Icon(Icons.sync_rounded, color: AppColors.gold, size: 18),
+                Icon(Icons.sync_rounded, color: AppColors.primary, size: 18),
                 SizedBox(width: 9),
                 Expanded(
                   child: Text(
                     'Os indicadores são recalculados a cada atualização do dashboard.',
                     style: TextStyle(
-                      color: AppColors.silverDark,
+                      color: AppColors.textMuted,
                       fontSize: 12,
                     ),
                   ),
@@ -361,12 +361,12 @@ class _DashboardPageState extends State<DashboardPage> {
                     Icon(
                       Icons.event_available_outlined,
                       size: 34,
-                      color: AppColors.silverDark,
+                      color: AppColors.textMuted,
                     ),
                     SizedBox(height: 10),
                     Text(
                       'Nenhum serviço próximo.',
-                      style: TextStyle(color: AppColors.silverDark),
+                      style: TextStyle(color: AppColors.textMuted),
                     ),
                   ],
                 ),
@@ -398,7 +398,7 @@ class _LoadingDashboard extends StatelessWidget {
             SizedBox(height: 14),
             Text(
               'Carregando indicadores...',
-              style: TextStyle(color: AppColors.silverDark),
+              style: TextStyle(color: AppColors.textMuted),
             ),
           ],
         ),
@@ -424,7 +424,7 @@ class _MetricCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accent = danger ? AppColors.danger : AppColors.gold;
+    final accent = danger ? AppColors.danger : AppColors.primary;
     return Card(
       clipBehavior: Clip.antiAlias,
       child: Container(
@@ -482,7 +482,7 @@ class _MetricCard extends StatelessWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
-                color: AppColors.silverDark,
+                color: AppColors.textMuted,
                 fontSize: 12,
               ),
             ),
@@ -517,7 +517,7 @@ class _MiniStat extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: AppColors.gold, size: 20),
+          Icon(icon, color: AppColors.primary, size: 20),
           const SizedBox(width: 10),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -532,7 +532,7 @@ class _MiniStat extends StatelessWidget {
               Text(
                 label,
                 style: const TextStyle(
-                  color: AppColors.silverDark,
+                  color: AppColors.textMuted,
                   fontSize: 11,
                 ),
               ),
@@ -571,10 +571,10 @@ class _SectionCard extends StatelessWidget {
                   width: 42,
                   height: 42,
                   decoration: BoxDecoration(
-                    color: AppColors.gold.withValues(alpha: .10),
+                    color: AppColors.primary.withValues(alpha: .10),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(icon, color: AppColors.gold, size: 21),
+                  child: Icon(icon, color: AppColors.primary, size: 21),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -592,7 +592,7 @@ class _SectionCard extends StatelessWidget {
                       Text(
                         subtitle,
                         style: const TextStyle(
-                          color: AppColors.silverDark,
+                          color: AppColors.textMuted,
                           fontSize: 12,
                         ),
                       ),
@@ -627,7 +627,7 @@ class _AttentionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accent = danger ? AppColors.danger : AppColors.gold;
+    final accent = danger ? AppColors.danger : AppColors.primary;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -650,7 +650,7 @@ class _AttentionRow extends StatelessWidget {
               Text(
                 subtitle,
                 style: const TextStyle(
-                  color: AppColors.silverDark,
+                  color: AppColors.textMuted,
                   fontSize: 12,
                 ),
               ),
@@ -699,7 +699,7 @@ class _ServiceRow extends StatelessWidget {
           ),
           child: const Icon(
             Icons.handyman_outlined,
-            color: AppColors.gold,
+            color: AppColors.primary,
             size: 20,
           ),
         ),
@@ -715,7 +715,7 @@ class _ServiceRow extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                  color: AppColors.silverDark,
+                  color: AppColors.textMuted,
                   fontSize: 12,
                 ),
               ),
@@ -726,18 +726,18 @@ class _ServiceRow extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
-            color: AppColors.gold.withValues(alpha: .10),
+            color: AppColors.primary.withValues(alpha: .10),
             borderRadius: BorderRadius.circular(999),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.event_outlined, color: AppColors.gold, size: 14),
+              const Icon(Icons.event_outlined, color: AppColors.primary, size: 14),
               const SizedBox(width: 5),
               Text(
                 dueDate,
                 style: const TextStyle(
-                  color: AppColors.gold,
+                  color: AppColors.primary,
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
                 ),
@@ -767,13 +767,13 @@ class _ErrorCard extends StatelessWidget {
               width: 58,
               height: 58,
               decoration: BoxDecoration(
-                color: AppColors.gold.withValues(alpha: .10),
+                color: AppColors.primary.withValues(alpha: .10),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: const Icon(
                 Icons.cloud_off_outlined,
                 size: 30,
-                color: AppColors.gold,
+                color: AppColors.primary,
               ),
             ),
             const SizedBox(height: 14),
@@ -785,7 +785,7 @@ class _ErrorCard extends StatelessWidget {
             Text(
               '$error',
               textAlign: TextAlign.center,
-              style: const TextStyle(color: AppColors.silverDark),
+              style: const TextStyle(color: AppColors.textMuted),
             ),
             const SizedBox(height: 16),
             OutlinedButton.icon(

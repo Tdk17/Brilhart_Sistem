@@ -81,11 +81,11 @@ class _BillingPageState extends State<BillingPage> {
                 width: 52,
                 height: 52,
                 decoration: BoxDecoration(
-                  color: AppColors.gold.withValues(alpha: .12),
+                  color: AppColors.primary.withValues(alpha: .12),
                   borderRadius: BorderRadius.circular(15),
-                  border: Border.all(color: AppColors.gold.withValues(alpha: .32)),
+                  border: Border.all(color: AppColors.primary.withValues(alpha: .32)),
                 ),
-                child: const Icon(Icons.payments_outlined, color: AppColors.gold),
+                child: const Icon(Icons.payments_outlined, color: AppColors.primary),
               ),
               const SizedBox(width: 16),
               const Expanded(
@@ -96,7 +96,7 @@ class _BillingPageState extends State<BillingPage> {
                     SizedBox(height: 6),
                     Text(
                       'Visão financeira consolidada por período e origem.',
-                      style: TextStyle(color: AppColors.silverDark),
+                      style: TextStyle(color: AppColors.textMuted),
                     ),
                   ],
                 ),
@@ -173,18 +173,18 @@ class _BillingPageState extends State<BillingPage> {
                 children: [
                   const Row(
                     children: [
-                      Icon(Icons.pie_chart_outline, color: AppColors.gold),
+                      Icon(Icons.pie_chart_outline, color: AppColors.primary),
                       SizedBox(width: 10),
                       Text('Receita por origem', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
                     ],
                   ),
                   const SizedBox(height: 6),
-                  const Text('Distribuição comercial do período selecionado.', style: TextStyle(color: AppColors.silverDark)),
+                  const Text('Distribuição comercial do período selecionado.', style: TextStyle(color: AppColors.textMuted)),
                   const SizedBox(height: 18),
                   if (originRows.isEmpty)
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: 28),
-                      child: Center(child: Text('Sem dados por origem no período.', style: TextStyle(color: AppColors.silverDark))),
+                      child: Center(child: Text('Sem dados por origem no período.', style: TextStyle(color: AppColors.textMuted))),
                     )
                   else
                     ...originRows.map((raw) {
@@ -200,8 +200,8 @@ class _BillingPageState extends State<BillingPage> {
                         child: Row(
                           children: [
                             const CircleAvatar(
-                              backgroundColor: Color(0xFF2A2412),
-                              child: Icon(Icons.source_outlined, color: AppColors.gold),
+                              backgroundColor: Color(0xFF1D3652),
+                              child: Icon(Icons.source_outlined, color: AppColors.primary),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
@@ -210,11 +210,11 @@ class _BillingPageState extends State<BillingPage> {
                                 children: [
                                   Text('${item['origin'] ?? 'Origem'}', style: const TextStyle(fontWeight: FontWeight.w700)),
                                   const SizedBox(height: 3),
-                                  Text('${item['count'] ?? 0} serviço(s)', style: const TextStyle(color: AppColors.silverDark, fontSize: 12)),
+                                  Text('${item['count'] ?? 0} serviço(s)', style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
                                 ],
                               ),
                             ),
-                            Text(money(item['revenue']), style: const TextStyle(color: AppColors.goldSoft, fontWeight: FontWeight.w800, fontSize: 15)),
+                            Text(money(item['revenue']), style: const TextStyle(color: AppColors.primarySoft, fontWeight: FontWeight.w800, fontSize: 15)),
                           ],
                         ),
                       );
@@ -235,7 +235,7 @@ class _BillingPageState extends State<BillingPage> {
           borderRadius: BorderRadius.circular(18),
           border: Border.all(color: AppColors.border),
         ),
-        child: Column(children: [icon, const SizedBox(height: 14), Text(text, style: const TextStyle(color: AppColors.silverDark))]),
+        child: Column(children: [icon, const SizedBox(height: 14), Text(text, style: const TextStyle(color: AppColors.textMuted))]),
       );
 
   Widget _errorCard() => Container(
@@ -280,10 +280,10 @@ class _Metric extends StatelessWidget {
             width: 46,
             height: 46,
             decoration: BoxDecoration(
-              color: AppColors.gold.withValues(alpha: .11),
+              color: AppColors.primary.withValues(alpha: .11),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: Icon(icon, color: AppColors.gold),
+            child: Icon(icon, color: AppColors.primary),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -294,7 +294,7 @@ class _Metric extends StatelessWidget {
                 Text(value, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
                 const SizedBox(height: 2),
                 Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
-                Text(caption, style: const TextStyle(color: AppColors.silverDark, fontSize: 11)),
+                Text(caption, style: const TextStyle(color: AppColors.textMuted, fontSize: 11)),
               ],
             ),
           ),

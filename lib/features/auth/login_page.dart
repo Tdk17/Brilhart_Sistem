@@ -53,7 +53,7 @@ class _LoginPageState extends State<LoginPage> {
           gradient: RadialGradient(
             center: Alignment.topRight,
             radius: 1.25,
-            colors: [Color(0xFF2B2410), Color(0xFF101010), AppColors.black],
+            colors: [Color(0xFF16345A), Color(0xFF111F33), AppColors.background],
           ),
         ),
         child: Center(
@@ -93,7 +93,7 @@ class _LoginPageState extends State<LoginPage> {
                       const Text(
                         'Gestão interna • Brilhart Laqueamentos',
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: AppColors.silverDark),
+                        style: TextStyle(color: AppColors.textMuted),
                       ),
                       const SizedBox(height: 30),
                       TextField(
@@ -179,7 +179,7 @@ class _LoginPageState extends State<LoginPage> {
                           Icon(
                             Icons.verified_user_outlined,
                             size: 16,
-                            color: AppColors.silverDark,
+                            color: AppColors.textMuted,
                           ),
                           SizedBox(width: 7),
                           Flexible(
@@ -188,7 +188,7 @@ class _LoginPageState extends State<LoginPage> {
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontSize: 12,
-                                color: AppColors.silverDark,
+                                color: AppColors.textMuted,
                               ),
                             ),
                           ),
