@@ -61,7 +61,7 @@ class AppShell extends StatelessWidget {
           Material(
             color: AppColors.sidebar,
             child: Container(
-              width: 264,
+              width: 246,
               decoration: const BoxDecoration(
                 border: Border(right: BorderSide(color: AppColors.border)),
               ),
@@ -69,7 +69,7 @@ class AppShell extends StatelessWidget {
               child: Column(
                 children: [
                   const Padding(
-                    padding: EdgeInsets.fromLTRB(18, 20, 18, 16),
+                    padding: EdgeInsets.fromLTRB(18, 20, 18, 18),
                     child: _BrandHeader(),
                   ),
                   const Divider(height: 1),
@@ -101,32 +101,28 @@ class _WorkspaceBar extends StatelessWidget {
         .map((item) => item.label)
         .firstOrNull ?? 'Gestão';
     return Container(
-      height: 72,
-      padding: const EdgeInsets.symmetric(horizontal: 28),
+      height: 64,
+      padding: const EdgeInsets.symmetric(horizontal: 24),
       decoration: const BoxDecoration(
         color: AppColors.sidebar,
         border: Border(bottom: BorderSide(color: AppColors.border)),
       ),
       child: Row(children: [
-        const Icon(Icons.space_dashboard_outlined, size: 19, color: AppColors.textMuted),
+        Expanded(child: Text(title,
+          maxLines: 1, overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600))),
+        Tooltip(
+          message: 'Central fiscal',
+          child: IconButton(
+            onPressed: () => context.go('/notas-fiscais'),
+            icon: const Icon(Icons.receipt_long_outlined,
+              size: 20, color: AppColors.textMuted),
+          ),
+        ),
         const SizedBox(width: 12),
-        const Text('Workspace', style: TextStyle(color: AppColors.textMuted)),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 12),
-          child: Icon(Icons.chevron_right, size: 16, color: AppColors.textMuted),
-        ),
-        Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
-        const Spacer(),
-        OutlinedButton.icon(
-          onPressed: () => context.go('/notas-fiscais'),
-          icon: const Icon(Icons.receipt_long_outlined, size: 18),
-          label: const Text('Central fiscal'),
-        ),
-        const SizedBox(width: 18),
         const CircleAvatar(
-          radius: 18,
-          backgroundColor: AppColors.surfaceElevated,
-          child: Icon(Icons.person_outline, size: 20, color: AppColors.textSecondary),
+          radius: 16, backgroundColor: AppColors.surfaceAlt,
+          child: Icon(Icons.person_outline, size: 18, color: AppColors.textMuted),
         ),
       ]),
     );
@@ -169,7 +165,7 @@ class _BrandHeaderState extends State<_BrandHeader> {
 
   @override
   Widget build(BuildContext context) {
-    final logoSize = widget.compact ? 42.0 : 52.0;
+    final logoSize = widget.compact ? 38.0 : 42.0;
 
     return Row(
       children: [
@@ -180,7 +176,7 @@ class _BrandHeaderState extends State<_BrandHeader> {
           decoration: BoxDecoration(
             color: AppColors.sidebar,
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: AppColors.primary.withValues(alpha: .35)),
+            border: Border.all(color: AppColors.border),
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(10),
@@ -205,8 +201,8 @@ class _BrandHeaderState extends State<_BrandHeader> {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontSize: widget.compact ? 17 : 18,
-                  fontWeight: FontWeight.w800,
+                  fontSize: widget.compact ? 16 : 17,
+                  fontWeight: FontWeight.w700,
                   color: AppColors.white,
                 ),
               ),
@@ -263,41 +259,34 @@ class _Menu extends StatelessWidget {
       children: [
         Expanded(
           child: ListView.separated(
-            padding: const EdgeInsets.fromLTRB(12, 14, 12, 14),
+            padding: const EdgeInsets.fromLTRB(12, 22, 12, 22),
             itemCount: items.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 5),
+            separatorBuilder: (_, __) => const SizedBox(height: 2),
             itemBuilder: (_, index) {
               final item = items[index];
               final selected = location == item.path;
 
               return Material(
-                color: selected ? AppColors.primary.withValues(alpha: .18) : Colors.transparent,
-                borderRadius: BorderRadius.circular(12),
+                color: selected ? AppColors.surfaceAlt : Colors.transparent,
+                borderRadius: BorderRadius.circular(9),
                 child: ListTile(
-                  minTileHeight: 46,
+                  minTileHeight: 44,
                   dense: true,
                   horizontalTitleGap: 11,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 13),
                   leading: Icon(
                     item.icon,
                     size: 20,
-                    color: selected ? AppColors.primary : AppColors.textMuted,
+                    color: selected ? AppColors.primarySoft : AppColors.textMuted,
                   ),
                   title: Text(
                     item.label,
                     style: TextStyle(
-                      color: selected ? AppColors.white : AppColors.textSecondary,
+                      color: selected ? AppColors.white : AppColors.textMuted,
                       fontSize: 14,
-                      fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                      fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
                     ),
                   ),
-                  trailing: selected
-                      ? const Icon(
-                          Icons.chevron_right_rounded,
-                          size: 18,
-                          color: AppColors.primary,
-                        )
-                      : null,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
