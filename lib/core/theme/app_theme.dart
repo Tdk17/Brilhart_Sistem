@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 
 abstract final class AppColors {
-  static const background = Color(0xFF101B2B);
-  static const sidebar = Color(0xFF091526);
-  static const surface = Color(0xFF18273B);
-  static const surfaceAlt = Color(0xFF1D2E44);
-  static const surfaceElevated = Color(0xFF26384E);
-  static const border = Color(0xFF35465C);
-  static const textSecondary = Color(0xFFD5DEEA);
-  static const textMuted = Color(0xFFABBCD1);
-  static const primary = Color(0xFF6CA9FF);
-  static const primarySoft = Color(0xFFA9CDFF);
-  static const primaryDark = Color(0xFF3569A8);
+  static const background = Color(0xFF0C1421);
+  static const sidebar = Color(0xFF101A29);
+  static const surface = Color(0xFF152131);
+  static const surfaceAlt = Color(0xFF1A293A);
+  static const surfaceElevated = Color(0xFF223246);
+  static const border = Color(0xFF29394C);
+  static const textSecondary = Color(0xFFDAE1E9);
+  static const textMuted = Color(0xFF98A8BB);
+  static const primary = Color(0xFF8EB5EA);
+  static const primarySoft = Color(0xFFB7CFF2);
+  static const primaryDark = Color(0xFF496D9E);
   static const white = Color(0xFFF6F8FC);
   static const danger = Color(0xFFFF8C91);
   static const success = Color(0xFF60D6B0);
@@ -33,8 +33,8 @@ abstract final class AppTheme {
       brightness: Brightness.dark,
       scaffoldBackgroundColor: AppColors.background,
       colorScheme: scheme,
-      fontFamily: 'Arial',
-      visualDensity: VisualDensity.standard,
+      fontFamily: 'Roboto',
+      visualDensity: VisualDensity.compact,
       dividerColor: AppColors.border,
       splashColor: AppColors.primary.withValues(alpha: .08),
       highlightColor: AppColors.primary.withValues(alpha: .05),
@@ -43,7 +43,7 @@ abstract final class AppTheme {
         elevation: 0,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(12)),
+          borderRadius: BorderRadius.all(Radius.circular(10)),
           side: BorderSide(color: AppColors.border),
         ),
       ),
@@ -62,23 +62,23 @@ abstract final class AppTheme {
         prefixIconColor: AppColors.textMuted,
         suffixIconColor: AppColors.textMuted,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(12)),
+          borderRadius: BorderRadius.all(Radius.circular(10)),
           borderSide: BorderSide(color: AppColors.border),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(12)),
+          borderRadius: BorderRadius.all(Radius.circular(10)),
           borderSide: BorderSide(color: AppColors.border),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(12)),
+          borderRadius: BorderRadius.all(Radius.circular(10)),
           borderSide: BorderSide(color: AppColors.primary, width: 1.4),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(12)),
+          borderRadius: BorderRadius.all(Radius.circular(10)),
           borderSide: BorderSide(color: AppColors.danger),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(12)),
+          borderRadius: BorderRadius.all(Radius.circular(10)),
           borderSide: BorderSide(color: AppColors.danger, width: 1.4),
         ),
       ),
@@ -88,7 +88,7 @@ abstract final class AppTheme {
           foregroundColor: AppColors.background,
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
           textStyle: const TextStyle(fontWeight: FontWeight.w700),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -97,7 +97,7 @@ abstract final class AppTheme {
           side: const BorderSide(color: AppColors.primaryDark),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           textStyle: const TextStyle(fontWeight: FontWeight.w600),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
@@ -112,14 +112,14 @@ abstract final class AppTheme {
         side: const BorderSide(color: AppColors.border),
         labelStyle: const TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w600),
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
       snackBarTheme: const SnackBarThemeData(
         backgroundColor: AppColors.surfaceElevated,
         contentTextStyle: TextStyle(color: AppColors.white),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(12)),
+          borderRadius: BorderRadius.all(Radius.circular(10)),
           side: BorderSide(color: AppColors.border),
         ),
       ),
