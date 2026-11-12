@@ -149,7 +149,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
           const SizedBox(height: 19),
-          const ConstrainedBox(
+          ConstrainedBox(
             constraints: BoxConstraints(maxWidth: 410),
             child: Text(
               'Um ambiente de trabalho para organizar orçamentos, produção, clientes e resultados com clareza.',
