@@ -143,7 +143,7 @@ class _DashboardPageState extends State<DashboardPage> {
         gradient: const LinearGradient(
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
-          colors: [Color(0xFF17140C), Color(0xFF0F0F0F)],
+          colors: [Color(0xFF183B68), Color(0xFF111D31)],
         ),
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppColors.gold.withValues(alpha: .24)),

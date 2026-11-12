@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
 
 abstract final class AppColors {
-  static const black = Color(0xFF070707);
-  static const surface = Color(0xFF111111);
-  static const surfaceAlt = Color(0xFF191919);
-  static const surfaceElevated = Color(0xFF202020);
-  static const border = Color(0xFF2B2B2B);
-  static const silver = Color(0xFFC8C8C8);
-  static const silverDark = Color(0xFF8D8D8D);
-  static const gold = Color(0xFFD4AF37);
-  static const goldSoft = Color(0xFFF0D87A);
-  static const goldDark = Color(0xFF9E7E1C);
-  static const white = Color(0xFFF5F5F5);
+  static const black = Color(0xFF0B1628);
+  static const surface = Color(0xFF142238);
+  static const surfaceAlt = Color(0xFF1B2D45);
+  static const surfaceElevated = Color(0xFF263449);
+  static const border = Color(0xFF33445D);
+  static const silver = Color(0xFFD6DEE9);
+  static const silverDark = Color(0xFF9CAFC6);
+  // Legacy names kept for compatibility with existing widgets.
+  // Their values now follow the corporate blue design system.
+  static const gold = Color(0xFF3B82F6);
+  static const goldSoft = Color(0xFF93C5FD);
+  static const goldDark = Color(0xFF2563EB);
+  static const white = Color(0xFFF5F8FC);
+  static const blue = gold;
+  static const blueLight = goldSoft;
+  static const blueDark = goldDark;
   static const danger = Color(0xFFD9534F);
   static const success = Color(0xFF3FAE76);
   static const warning = Color(0xFFE1A23A);
