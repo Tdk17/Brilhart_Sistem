@@ -108,7 +108,7 @@ class _QuoteRequestPageState extends State<QuoteRequestPage> {
           gradient: RadialGradient(
             center: Alignment.topRight,
             radius: 1.3,
-            colors: [Color(0xFF2A2412), Color(0xFF101010), AppColors.black],
+            colors: [Color(0xFF1D3652), Color(0xFF111F33), AppColors.background],
           ),
         ),
         child: SafeArea(
@@ -163,7 +163,7 @@ class _QuoteRequestPageState extends State<QuoteRequestPage> {
           const Text(
             'A Brilhart recebeu seus dados. Nossa equipe analisará as informações antes de emitir o orçamento oficial.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: AppColors.silverDark, height: 1.45),
+            style: TextStyle(color: AppColors.textMuted, height: 1.45),
           ),
           const SizedBox(height: 22),
           OutlinedButton.icon(
@@ -190,7 +190,7 @@ class _QuoteRequestPageState extends State<QuoteRequestPage> {
             const Text(
               'Preencha as informações abaixo para nossa equipe avaliar o serviço e preparar uma proposta.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.silverDark, height: 1.45),
+              style: TextStyle(color: AppColors.textMuted, height: 1.45),
             ),
             const SizedBox(height: 26),
             Container(
@@ -245,7 +245,7 @@ class _QuoteRequestPageState extends State<QuoteRequestPage> {
                 children: [
                   const Text('Fotos do serviço', style: TextStyle(fontWeight: FontWeight.w800)),
                   const SizedBox(height: 5),
-                  const Text('Você pode enviar até 8 imagens, com no máximo 8 MB cada.', style: TextStyle(color: AppColors.silverDark, fontSize: 12)),
+                  const Text('Você pode enviar até 8 imagens, com no máximo 8 MB cada.', style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
                   const SizedBox(height: 12),
                   OutlinedButton.icon(
                     onPressed: _busy ? null : _pickPhotos,

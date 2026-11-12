@@ -18,6 +18,7 @@ class AppShell extends StatelessWidget {
     _NavItem('/orcamentos', 'Orçamentos', Icons.request_quote_outlined),
     _NavItem('/producao', 'Produção', Icons.precision_manufacturing_outlined),
     _NavItem('/faturamento', 'Faturamento', Icons.payments_outlined),
+    _NavItem('/notas-fiscais', 'Notas fiscais', Icons.receipt_long_outlined),
     _NavItem('/contratos', 'Contratos', Icons.description_outlined),
     _NavItem('/documentos', 'Documentos', Icons.folder_copy_outlined),
     _NavItem('/configuracoes', 'Configurações', Icons.settings_outlined),
@@ -31,12 +32,12 @@ class AppShell extends StatelessWidget {
     if (compact) {
       return Scaffold(
         appBar: AppBar(
-          backgroundColor: AppColors.surface,
+          backgroundColor: AppColors.sidebar,
           titleSpacing: 8,
           title: const _BrandHeader(compact: true),
         ),
         drawer: Drawer(
-          backgroundColor: AppColors.surface,
+          backgroundColor: AppColors.sidebar,
           child: SafeArea(
             child: Column(
               children: [
@@ -57,13 +58,14 @@ class AppShell extends StatelessWidget {
     return Scaffold(
       body: Row(
         children: [
-          Container(
-            width: 248,
-            decoration: const BoxDecoration(
-              color: AppColors.surface,
-              border: Border(right: BorderSide(color: Colors.white10)),
-            ),
-            child: SafeArea(
+          Material(
+            color: AppColors.sidebar,
+            child: Container(
+              width: 264,
+              decoration: const BoxDecoration(
+                border: Border(right: BorderSide(color: AppColors.border)),
+              ),
+              child: SafeArea(
               child: Column(
                 children: [
                   const Padding(
@@ -74,11 +76,59 @@ class AppShell extends StatelessWidget {
                   Expanded(child: _Menu(items: _items)),
                 ],
               ),
+              ),
             ),
           ),
-          Expanded(child: child),
+          Expanded(
+            child: Column(
+              children: [const _WorkspaceBar(), Expanded(child: child)],
+            ),
+          ),
         ],
       ),
+    );
+  }
+}
+
+class _WorkspaceBar extends StatelessWidget {
+  const _WorkspaceBar();
+
+  @override
+  Widget build(BuildContext context) {
+    final location = GoRouterState.of(context).matchedLocation;
+    final title = AppShell._items
+        .where((item) => item.path == location)
+        .map((item) => item.label)
+        .firstOrNull ?? 'Gestão';
+    return Container(
+      height: 72,
+      padding: const EdgeInsets.symmetric(horizontal: 28),
+      decoration: const BoxDecoration(
+        color: AppColors.sidebar,
+        border: Border(bottom: BorderSide(color: AppColors.border)),
+      ),
+      child: Row(children: [
+        const Icon(Icons.space_dashboard_outlined, size: 19, color: AppColors.textMuted),
+        const SizedBox(width: 12),
+        const Text('Workspace', style: TextStyle(color: AppColors.textMuted)),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12),
+          child: Icon(Icons.chevron_right, size: 16, color: AppColors.textMuted),
+        ),
+        Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
+        const Spacer(),
+        OutlinedButton.icon(
+          onPressed: () => context.go('/notas-fiscais'),
+          icon: const Icon(Icons.receipt_long_outlined, size: 18),
+          label: const Text('Central fiscal'),
+        ),
+        const SizedBox(width: 18),
+        const CircleAvatar(
+          radius: 18,
+          backgroundColor: AppColors.surfaceElevated,
+          child: Icon(Icons.person_outline, size: 20, color: AppColors.textSecondary),
+        ),
+      ]),
     );
   }
 }
@@ -128,9 +178,9 @@ class _BrandHeaderState extends State<_BrandHeader> {
           height: logoSize,
           padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
-            color: Colors.black,
+            color: AppColors.sidebar,
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: AppColors.gold.withValues(alpha: .35)),
+            border: Border.all(color: AppColors.primary.withValues(alpha: .35)),
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(10),
@@ -170,7 +220,7 @@ class _BrandHeaderState extends State<_BrandHeader> {
                     fontSize: 9,
                     letterSpacing: 1.15,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.silverDark,
+                    color: AppColors.textMuted,
                   ),
                 ),
               ],
@@ -190,7 +240,7 @@ class _BrandHeaderState extends State<_BrandHeader> {
         child: Text(
           'B',
           style: TextStyle(
-            color: AppColors.gold,
+            color: AppColors.primary,
             fontSize: 24,
             fontWeight: FontWeight.w900,
           ),
@@ -221,7 +271,7 @@ class _Menu extends StatelessWidget {
               final selected = location == item.path;
 
               return Material(
-                color: selected ? AppColors.gold : Colors.transparent,
+                color: selected ? AppColors.primary.withValues(alpha: .18) : Colors.transparent,
                 borderRadius: BorderRadius.circular(12),
                 child: ListTile(
                   minTileHeight: 46,
@@ -231,12 +281,12 @@ class _Menu extends StatelessWidget {
                   leading: Icon(
                     item.icon,
                     size: 20,
-                    color: selected ? AppColors.black : AppColors.silver,
+                    color: selected ? AppColors.primary : AppColors.textMuted,
                   ),
                   title: Text(
                     item.label,
                     style: TextStyle(
-                      color: selected ? AppColors.black : AppColors.silver,
+                      color: selected ? AppColors.white : AppColors.textSecondary,
                       fontSize: 14,
                       fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
                     ),
@@ -245,14 +295,14 @@ class _Menu extends StatelessWidget {
                       ? const Icon(
                           Icons.chevron_right_rounded,
                           size: 18,
-                          color: AppColors.black,
+                          color: AppColors.primary,
                         )
                       : null,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                   onTap: () {
-                    Navigator.maybePop(context);
+                    if (Scaffold.of(context).isDrawerOpen) Navigator.pop(context);
                     context.go(item.path);
                   },
                 ),
@@ -273,12 +323,12 @@ class _Menu extends StatelessWidget {
             leading: const Icon(
               Icons.logout_rounded,
               size: 20,
-              color: AppColors.silver,
+              color: AppColors.textSecondary,
             ),
             title: const Text(
               'Sair',
               style: TextStyle(
-                color: AppColors.silver,
+                color: AppColors.textSecondary,
                 fontWeight: FontWeight.w600,
               ),
             ),

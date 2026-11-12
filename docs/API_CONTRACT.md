@@ -202,7 +202,9 @@ Entrada: `id` + campos alterados.
 ### `v1-documents-download`
 Retorna `downloadUrl` segura/temporária.
 
-A emissão fiscal automática não faz parte do MVP. Nota/NFS-e automática só deve existir quando houver integração específica com provedor fiscal.
+A emissão de NFS-e faz parte do MVP e usa o módulo fiscal documentado em [FISCAL_MODULE.md](FISCAL_MODULE.md). `ClosingDocument` continua sendo um anexo/documento interno; nunca atribuir autorização fiscal a um PDF interno. A nota fiscal pertence a `FiscalInvoice`, vinculada ao serviço, e só recebe status autorizado após confirmação do provedor.
+
+Funções implementadas em `cloud/functions/fiscal`: `v1-fiscal-config-get`, `v1-fiscal-services-list`, `v1-fiscal-invoices-list`, `v1-fiscal-invoices-preview`, `v1-fiscal-invoices-issue`, `v1-fiscal-invoices-refresh`, `v1-fiscal-invoices-cancel` e `v1-fiscal-invoices-download`. Ver o documento fiscal para payloads, roles, índices, configurações, limites e implantação.
 
 ## 10. Configurações da empresa
 
@@ -247,6 +249,9 @@ Criar registro para mudanças importantes em clientes, solicitações, orçament
 - `ShareLog`
 - `CompanySettings`
 - `AuditLog`
+- `FiscalInvoice`
+- `FiscalLock`
+- `FiscalSequence`
 
 ## 13. Segurança mínima
 

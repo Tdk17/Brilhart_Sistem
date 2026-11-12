@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 import '../../core/services/api_client.dart';
 import '../../core/services/external_links.dart';
@@ -24,9 +26,19 @@ class ModuleField {
   final bool required;
 }
 
-enum ModuleActionType { cloud, whatsapp }
+enum ModuleActionType { cloud, whatsapp, navigate }
 
 class ModuleAction {
+  const ModuleAction.navigate({
+    required this.label,
+    required String route,
+    this.icon = Icons.open_in_new,
+  }) : type = ModuleActionType.navigate,
+       function = route,
+       payload = const {},
+       confirmMessage = null,
+       openReturnedUrl = false;
+
   const ModuleAction.cloud({
     required this.label,
     required this.function,
@@ -164,6 +176,8 @@ class _ModulePageState extends State<ModulePage> {
             _errorCard()
           else if (items.isEmpty)
             _emptyState()
+          else if (MediaQuery.sizeOf(context).width >= 1100)
+            _recordsTable()
           else
             ...items.map((raw) {
               final item = raw is Map
@@ -173,6 +187,58 @@ class _ModulePageState extends State<ModulePage> {
             }),
         ],
       ),
+    );
+  }
+
+  Widget _recordsTable() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.border),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: LayoutBuilder(builder: (context, constraints) => SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minWidth: constraints.maxWidth),
+          child: DataTable(
+            headingRowColor: const WidgetStatePropertyAll(AppColors.surfaceElevated),
+            headingTextStyle: const TextStyle(color: AppColors.textMuted, fontSize: 11, letterSpacing: .8, fontWeight: FontWeight.w700),
+            dataRowMinHeight: 70,
+            dataRowMaxHeight: 78,
+            columnSpacing: 28,
+            columns: const [
+              DataColumn(label: Text('REGISTRO / CLIENTE')),
+              DataColumn(label: Text('SITUAÇÃO')),
+              DataColumn(label: Text('VALOR')),
+              DataColumn(label: Text('PRAZO / DATA')),
+              DataColumn(label: Text('AÇÕES')),
+            ],
+            rows: items.map((raw) {
+              final item = raw is Map ? Map<String, dynamic>.from(raw) : <String, dynamic>{};
+              final title = '${item['name'] ?? item['clientName'] ?? item['number'] ?? item['serviceType'] ?? 'Registro'}';
+              final description = '${item['description'] ?? item['phone'] ?? item['cityAddress'] ?? ''}';
+              final status = '${item['status'] ?? '—'}';
+              return DataRow(cells: [
+                DataCell(SizedBox(width: 250, child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 5),
+                    Text(description, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
+                  ],
+                )), onTap: () => _showDetails(item)),
+                DataCell(_softBadge(Icons.circle, status, _statusColor(status))),
+                DataCell(Text(item['value'] is num ? NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$').format(item['value']) : '—')),
+                DataCell(Text('${item['dueDate'] ?? item['date'] ?? '—'}')),
+                DataCell(TextButton.icon(onPressed: () => _showDetails(item), icon: const Icon(Icons.arrow_forward, size: 16), label: const Text('Abrir'))),
+              ]);
+            }).toList(),
+          ),
+        ),
+      )),
     );
   }
 
@@ -186,11 +252,11 @@ class _ModulePageState extends State<ModulePage> {
               width: 52,
               height: 52,
               decoration: BoxDecoration(
-                color: AppColors.gold.withValues(alpha: .12),
+                color: AppColors.primary.withValues(alpha: .12),
                 borderRadius: BorderRadius.circular(15),
-                border: Border.all(color: AppColors.gold.withValues(alpha: .32)),
+                border: Border.all(color: AppColors.primary.withValues(alpha: .32)),
               ),
-              child: Icon(_moduleIcon, color: AppColors.gold, size: 26),
+              child: Icon(_moduleIcon, color: AppColors.primary, size: 26),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -202,7 +268,7 @@ class _ModulePageState extends State<ModulePage> {
                     style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w800, letterSpacing: -.4),
                   ),
                   const SizedBox(height: 6),
-                  Text(widget.subtitle, style: const TextStyle(color: AppColors.silverDark, height: 1.4)),
+                  Text(widget.subtitle, style: const TextStyle(color: AppColors.textMuted, height: 1.4)),
                 ],
               ),
             ),
@@ -266,7 +332,7 @@ class _ModulePageState extends State<ModulePage> {
         children: [
           _summaryItem(Icons.inventory_2_outlined, '$visibleCount', 'registros exibidos'),
           _summaryItem(Icons.flag_outlined, '$withStatus', 'com status'),
-          _summaryItem(Icons.sync_outlined, loading ? 'Atualizando' : 'Sincronizado', 'Back4App'),
+          _summaryItem(Icons.sync_outlined, loading ? 'Atualizando' : error != null ? 'Indisponível' : 'Atualizado', 'dados da operação'),
         ],
       ),
     );
@@ -276,11 +342,11 @@ class _ModulePageState extends State<ModulePage> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 18, color: AppColors.gold),
+        Icon(icon, size: 18, color: AppColors.primary),
         const SizedBox(width: 8),
         Text(value, style: const TextStyle(fontWeight: FontWeight.w800)),
         const SizedBox(width: 5),
-        Text(label, style: const TextStyle(color: AppColors.silverDark, fontSize: 12)),
+        Text(label, style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
       ],
     );
   }
@@ -367,7 +433,7 @@ class _ModulePageState extends State<ModulePage> {
           children: [
             CircularProgressIndicator(),
             SizedBox(height: 14),
-            Text('Carregando informações...', style: TextStyle(color: AppColors.silverDark)),
+            Text('Carregando informações...', style: TextStyle(color: AppColors.textMuted)),
           ],
         ),
       );
@@ -385,10 +451,10 @@ class _ModulePageState extends State<ModulePage> {
               width: 62,
               height: 62,
               decoration: BoxDecoration(
-                color: AppColors.gold.withValues(alpha: .10),
+                color: AppColors.primary.withValues(alpha: .10),
                 borderRadius: BorderRadius.circular(18),
               ),
-              child: Icon(_moduleIcon, color: AppColors.gold, size: 30),
+              child: Icon(_moduleIcon, color: AppColors.primary, size: 30),
             ),
             const SizedBox(height: 16),
             const Text('Nenhum registro encontrado', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 17)),
@@ -396,7 +462,7 @@ class _ModulePageState extends State<ModulePage> {
             const Text(
               'Altere os filtros ou adicione um novo registro para começar.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.silverDark),
+              style: TextStyle(color: AppColors.textMuted),
             ),
           ],
         ),
@@ -414,7 +480,7 @@ class _ModulePageState extends State<ModulePage> {
           const SizedBox(height: 12),
           const Text('Não foi possível carregar os dados.', style: TextStyle(fontWeight: FontWeight.w700)),
           const SizedBox(height: 7),
-          Text('$error', textAlign: TextAlign.center, style: const TextStyle(color: AppColors.silverDark)),
+          Text('$error', textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textMuted)),
           const SizedBox(height: 16),
           OutlinedButton.icon(onPressed: _load, icon: const Icon(Icons.refresh), label: const Text('Tentar novamente')),
         ]),
@@ -452,7 +518,7 @@ class _ModulePageState extends State<ModulePage> {
                       '$subtitle',
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(color: AppColors.silverDark, height: 1.35),
+                      style: const TextStyle(color: AppColors.textMuted, height: 1.35),
                     ),
                   ],
                   const SizedBox(height: 11),
@@ -462,13 +528,13 @@ class _ModulePageState extends State<ModulePage> {
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       if (widget.originBadge && origin != null && origin.isNotEmpty)
-                        _softBadge(Icons.source_outlined, 'Origem: $origin', AppColors.silver),
+                        _softBadge(Icons.source_outlined, 'Origem: $origin', AppColors.textSecondary),
                       if (status != null && status.isNotEmpty)
                         _softBadge(Icons.circle, status, _statusColor(status)),
                       if (value != null && '$value'.isNotEmpty)
-                        _softBadge(Icons.payments_outlined, 'R\$ $value', AppColors.goldSoft),
+                        _softBadge(Icons.payments_outlined, 'R\$ $value', AppColors.primarySoft),
                       if (dueDate != null && '$dueDate'.isNotEmpty)
-                        _softBadge(Icons.event_outlined, '$dueDate', AppColors.silver),
+                        _softBadge(Icons.event_outlined, '$dueDate', AppColors.textSecondary),
                     ],
                   ),
                 ],
@@ -481,15 +547,15 @@ class _ModulePageState extends State<ModulePage> {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: AppColors.gold.withValues(alpha: .10),
+                      color: AppColors.primary.withValues(alpha: .10),
                       borderRadius: BorderRadius.circular(14),
                     ),
-                    child: Icon(_moduleIcon, color: AppColors.gold, size: 23),
+                    child: Icon(_moduleIcon, color: AppColors.primary, size: 23),
                   ),
                   const SizedBox(width: 15),
                   Expanded(child: details),
                   const SizedBox(width: 12),
-                  const Icon(Icons.chevron_right, color: AppColors.gold),
+                  const Icon(Icons.chevron_right, color: AppColors.primary),
                 ],
               );
             },
@@ -522,8 +588,8 @@ class _ModulePageState extends State<ModulePage> {
     final value = status.toLowerCase();
     if (value.contains('conclu') || value.contains('aprov') || value.contains('assinado')) return AppColors.success;
     if (value.contains('cancel') || value.contains('atras')) return AppColors.danger;
-    if (value.contains('produção') || value.contains('atendimento')) return AppColors.gold;
-    return AppColors.silver;
+    if (value.contains('produção') || value.contains('atendimento')) return AppColors.primary;
+    return AppColors.textSecondary;
   }
 
   Future<void> _showDetails(Map<String, dynamic> item) async {
@@ -538,10 +604,10 @@ class _ModulePageState extends State<ModulePage> {
               width: 42,
               height: 42,
               decoration: BoxDecoration(
-                color: AppColors.gold.withValues(alpha: .12),
+                color: AppColors.primary.withValues(alpha: .12),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(_moduleIcon, color: AppColors.gold),
+              child: Icon(_moduleIcon, color: AppColors.primary),
             ),
             const SizedBox(width: 12),
             Expanded(child: Text(widget.title, style: const TextStyle(fontWeight: FontWeight.w800))),
@@ -570,7 +636,7 @@ class _ModulePageState extends State<ModulePage> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(_fieldLabel(entry.key), style: const TextStyle(fontSize: 11, color: AppColors.silverDark, fontWeight: FontWeight.w700)),
+                                  Text(_fieldLabel(entry.key), style: const TextStyle(fontSize: 11, color: AppColors.textMuted, fontWeight: FontWeight.w700)),
                                   const SizedBox(height: 4),
                                   SelectableText('${entry.value}', style: const TextStyle(fontWeight: FontWeight.w600)),
                                 ],
@@ -655,6 +721,11 @@ class _ModulePageState extends State<ModulePage> {
   }
 
   Future<void> _runAction(ModuleAction action, Map<String, dynamic> item) async {
+    if (action.type == ModuleActionType.navigate) {
+      if (Navigator.of(context).canPop()) Navigator.of(context).pop();
+      context.go(Uri(path: action.function, queryParameters: {'serviceId': _idOf(item)}).toString());
+      return;
+    }
     if (action.type == ModuleActionType.whatsapp) {
       final phone = '${item['phone'] ?? item['whatsapp'] ?? item['clientPhone'] ?? ''}';
       if (phone.trim().isEmpty) {
@@ -779,10 +850,10 @@ class _ModulePageState extends State<ModulePage> {
                   width: 42,
                   height: 42,
                   decoration: BoxDecoration(
-                    color: AppColors.gold.withValues(alpha: .12),
+                    color: AppColors.primary.withValues(alpha: .12),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(editing ? Icons.edit_outlined : Icons.add, color: AppColors.gold),
+                  child: Icon(editing ? Icons.edit_outlined : Icons.add, color: AppColors.primary),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -790,7 +861,7 @@ class _ModulePageState extends State<ModulePage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(editing ? 'Editar registro' : 'Novo registro', style: const TextStyle(fontWeight: FontWeight.w800)),
-                      Text(widget.title, style: const TextStyle(fontSize: 12, color: AppColors.silverDark)),
+                      Text(widget.title, style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
                     ],
                   ),
                 ),

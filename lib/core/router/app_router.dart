@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/login_page.dart';
 import '../../features/billing/billing_page.dart';
 import '../../features/dashboard/dashboard_page.dart';
+import '../../features/fiscal/fiscal_page.dart';
 import '../../features/public/quote_request_page.dart';
 import '../../features/settings/settings_page.dart';
 import '../../features/shared/module_page.dart';
@@ -203,7 +204,19 @@ final appRouter = GoRouter(
                 confirmMessage:
                     'Confirmar conclusão? A data de conclusão será registrada pelo backend.',
               ),
+              ModuleAction.navigate(
+                label: 'Emitir / consultar NFS-e',
+                route: '/notas-fiscais',
+                icon: Icons.receipt_long_outlined,
+              ),
             ],
+          ),
+        ),
+        GoRoute(
+          path: '/notas-fiscais',
+          builder: (_, state) => FiscalPage(
+            key: ValueKey(state.uri.toString()),
+            serviceId: state.uri.queryParameters['serviceId'],
           ),
         ),
         GoRoute(
