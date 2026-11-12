@@ -15,7 +15,7 @@ class FiscalService {
     if (invoice.status === 'authorized' && !['authorized', 'cancelled', 'cancelling'].includes(update.status)) update.status = 'authorized';
     const merged = { ...invoice, status: update.status, providerStatus: update.providerStatus,
       message: update.message, lastCheckedAt: new Date().toISOString() };
-    for (const key of ['number', 'verificationCode', 'protocol', 'xmlPath', 'pdfPath']) if (update[key]) merged[key] = update[key];
+    for (const key of ['number', 'verificationCode', 'protocol', 'xmlPath', 'pdfPath', 'consultationUrl']) if (update[key]) merged[key] = update[key];
     return this.repo.save(merged, actor, action);
   }
   async issue(input, actor) {

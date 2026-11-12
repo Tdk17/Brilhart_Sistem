@@ -6,6 +6,7 @@ import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/services/api_client.dart';
+import '../../core/services/external_links.dart';
 import '../../core/theme/app_theme.dart';
 
 const fiscalStatusLabels = <String, String>{
@@ -193,6 +194,10 @@ class _FiscalPageState extends State<FiscalPage> {
           if (['authorized', 'cancelled'].contains(status)) ...[
             TextButton.icon(onPressed: busy || invoice['canDownloadPdf'] != true ? null : () => _perform(invoice, 'pdf'), icon: const Icon(Icons.picture_as_pdf_outlined), label: const Text('PDF')),
             TextButton.icon(onPressed: busy || invoice['canDownloadXml'] != true ? null : () => _perform(invoice, 'xml'), icon: const Icon(Icons.code), label: const Text('XML')),
+            if ('${invoice['consultationUrl'] ?? ''}'.isNotEmpty)
+              TextButton.icon(onPressed: busy ? null : () async {
+                if (!await ExternalLinks.openUrl('${invoice['consultationUrl']}')) _snack('Não foi possível abrir o portal.');
+              }, icon: const Icon(Icons.open_in_new), label: const Text('Consultar no portal')),
           ],
           if (['rejected', 'not_sent'].contains(status)) TextButton(onPressed: busy || _config['ready'] != true ? null : () => _newInvoice(previous: invoice), child: const Text('Revisar e reenviar')),
           if (status == 'authorized') TextButton(onPressed: busy ? null : () => _perform(invoice, 'cancel'), child: const Text('Solicitar cancelamento')),
@@ -318,7 +323,7 @@ class _IssueDialogState extends State<_IssueDialog> {
           const SizedBox(height: 14),
           DropdownButtonFormField<String>(
             key: ValueKey(_services.map((s) => s['id']).join()),
-            initialValue: _services.any((s) => s['id'] == _service?['id']) ? _service?['id'] as String? : null,
+            initialValue: _services.any((s) => s['id'] == _service?['id']) ? (_service?['id'] as String?) : null,
             isExpanded: true,
             decoration: const InputDecoration(labelText: 'Serviço concluído'),
             items: _services.map((s) => DropdownMenuItem(value: s['id'] as String, child: Text('${s['clientName']} • ${s['description']}', overflow: TextOverflow.ellipsis))).toList(),

@@ -133,3 +133,23 @@ test('download denies arbitrary hosts and strips auth on approved external PDF h
   const result = await p.download({ ...inv, pdfPath: 'https://docs.example.com/a.pdf' }, 'pdf');
   assert.equal(calls[0].options.headers.Authorization, undefined); assert.equal(result.contentType, 'application/pdf');
 });
+
+test('provider rejection HTTP 422 is uncertain because the reference may already exist', async () => {
+  const f = fixture({ send: async () => { throw new ProviderError('Já existe um DPS', 422); } });
+  await f.app.issue(await reviewed(f.app), 'user'); assert.equal(f.note().status, 'unknown');
+});
+test('municipal payload separates the service, company and CPF/CNPJ fields', () => {
+  const municipal = { ...config, mode: 'municipal', issuer: { ...config.issuer, municipalRegistration: '123' }, profiles: [{
+    id: 'test', label: 'Teste', serviceTypes: ['Teste'], fields: { natureza_operacao: '1', optante_simples_nacional: false,
+      servico: { item_lista_servico: '17.09', iss_retido: false, aliquota: 0.05 } } }] };
+  const snapshot = prepare(municipal, service, client, input);
+  const payload = buildPayload(snapshot, '2026-01-02T12:00:00Z');
+  assert.equal(payload.prestador.cnpj, config.issuer.cnpj);
+  assert.equal(payload.tomador.cpf, '52998224725'); assert.equal(payload.servico.valor_servicos, service.value);
+  assert.equal(payload.servico.iss_retido, false); assert(!('numero_dps' in payload));
+});
+test('municipal consultation pages do not masquerade as downloadable PDFs', () => {
+  const r = normalizeResponse({ status: 'autorizado', url: 'https://portal.example.com/consulta/123' });
+  assert.equal(r.pdfPath, ''); assert.equal(r.consultationUrl, 'https://portal.example.com/consulta/123');
+  assert.equal(normalizeResponse({ url: 'javascript:alert(1)' }).consultationUrl, '');
+});

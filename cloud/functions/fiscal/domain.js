@@ -99,7 +99,13 @@ function normalizeResponse(body, previous = 'processing') {
   const status = statuses[body?.status] || (['authorized', 'cancelled', 'denied'].includes(previous) ? previous : 'unknown');
   return { status, providerStatus: clean(body?.status), number: clean(body?.numero),
     verificationCode: clean(body?.codigo_verificacao), protocol: clean(body?.protocolo),
-    xmlPath: clean(body?.caminho_xml_nota_fiscal), pdfPath: clean(body?.url_danfse || body?.url),
+    xmlPath: clean(body?.caminho_xml_nota_fiscal),
+    pdfPath: clean(body?.url_danfse || (/\.pdf(?:[?#]|$)/i.test(body?.url || '') ? body.url : '')),
+    consultationUrl: safeConsultationUrl(body?.url),
     message: (Array.isArray(body?.erros) ? body.erros.map(e => [e.codigo, e.mensagem, e.correcao].filter(Boolean).join(' — ')).join('\n') : clean(body?.mensagem)).slice(0, 3000) };
+}
+function safeConsultationUrl(value) {
+  try { const url = new URL(value); return url.protocol === 'https:' && !url.username && !url.password ? url.toString() : ''; }
+  catch { return ''; }
 }
 module.exports = { FiscalError, check, clean, text, documentId, recipient, hash, reference, prepare, buildPayload, normalizeResponse };

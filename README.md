@@ -25,7 +25,8 @@ Solicitação pública de orçamento:
 - Produção/serviços, prazos, atrasos e conclusão
 - Faturamento e métricas por origem
 - Contratos
-- Notas/documentos de fechamento
+- NFS-e no MVP: emissão por serviço, consulta, reenvio, cancelamento e XML/PDF via provedor fiscal
+- Documentos de fechamento e anexos
 - Central de documentos
 - Fluxo de contato/compartilhamento por WhatsApp
 - Configurações da empresa
@@ -33,7 +34,7 @@ Solicitação pública de orçamento:
 
 ## Identidade visual
 
-Tema corporativo **preto, prata e dourado**. A logo oficial da Brilhart está em `assets/images/brilhart_logo.png` e também foi preparada para favicon e ícones da PWA.
+Tema corporativo **azul-marinho, cinza e azul**, com navegação lateral, barra de trabalho, indicadores e tabelas em desktop. A logo oficial da Brilhart está em `assets/images/brilhart_logo.png` e também foi preparada para favicon e ícones da PWA.
 
 ## Arquitetura
 
@@ -64,6 +65,14 @@ O frontend não usa mocks. A autenticação usa a sessão nativa do Parse/Back4A
 `docs/API_CONTRACT.md`
 
 Principais modelos: `_User`, `Client`, `QuoteRequest`, `Quote`, `Service`, `Contract`, `ClosingDocument`, `ShareLog`, `CompanySettings` e `AuditLog`.
+
+## Emissão fiscal no MVP
+
+A NFS-e faz parte do MVP. A central fica em `/notas-fiscais` e também pode ser aberta por um serviço na Produção. O conector inicial utiliza a API Focus NFe, com padrões nacional e municipal configuráveis no servidor.
+
+O código fiscal e a documentação de implantação estão em `cloud/` e [docs/FISCAL_MODULE.md](docs/FISCAL_MODULE.md). Publicar o frontend não instala o Cloud Code: é necessário acrescentar as funções ao Back4App, configurar classes/roles/índices, dados fiscais e credenciais, e homologar com a empresa. Nenhuma emissão real é simulada e o envio fica indisponível até a configuração.
+
+Não incluir certificado, token do emissor ou Parse Master Key no build Flutter. Verificação automatizada: `npm test --prefix cloud`, `flutter analyze --no-fatal-infos`, `flutter test` e build web pelo workflow `validate.yml`.
 
 ## Variáveis de build
 
