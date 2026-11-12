@@ -1,0 +1,61 @@
+name: Build Windows Desktop
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore logo asset
+        shell: pwsh
+        run: |
+          $data = [Convert]::FromBase64String((Get-Content assets/images/brilhart_logo.png.b64 -Raw).Trim())
+          [IO.File]::WriteAllBytes('assets/images/brilhart_logo.png', $data)
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Generate Windows platform runner
+        run: flutter create --platforms=windows .
+      - name: Get Flutter dependencies
+        run: flutter pub get
+      - name: Build Windows release
+        shell: pwsh
+        env:
+          PARSE_APPLICATION_ID: ${{ secrets.PARSE_APPLICATION_ID || vars.PARSE_APPLICATION_ID }}
+          PARSE_CLIENT_KEY: ${{ secrets.PARSE_CLIENT_KEY || vars.PARSE_CLIENT_KEY }}
+        run: |
+          if (-not $env:PARSE_APPLICATION_ID -or -not $env:PARSE_CLIENT_KEY) {
+            throw 'Configure PARSE_APPLICATION_ID and PARSE_CLIENT_KEY in repository Actions secrets.'
+          }
+          flutter build windows --release `
+            --dart-define=APP_ENV=production `
+            --dart-define=PARSE_APPLICATION_ID=$env:PARSE_APPLICATION_ID `
+            --dart-define=PARSE_CLIENT_KEY=$env:PARSE_CLIENT_KEY
+          if ($LASTEXITCODE -ne 0) { throw 'Windows release build failed.' }
+      - name: Package portable Windows application
+        shell: pwsh
+        run: |
+          $release = 'build/windows/x64/runner/Release'
+          if (-not (Test-Path "$release/brilhart_sistem.exe")) {
+            throw 'Windows executable not found.'
+          }
+          Compress-Archive -Path "$release/*" -DestinationPath Brilhart-Windows.zip -Force
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Brilhart-Windows
+          path: Brilhart-Windows.zip
+      - name: Publish release for tagged builds
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: Brilhart-Windows.zip
+          generate_release_notes: true

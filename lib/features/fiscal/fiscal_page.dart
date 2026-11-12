@@ -142,7 +142,8 @@ class _FiscalPageState extends State<FiscalPage> {
           ]),
           const SizedBox(height: 24),
           Wrap(spacing: 14, runSpacing: 12, crossAxisAlignment: WrapCrossAlignment.center, children: [
-            SizedBox(width: 260, child: DropdownButtonFormField<String>(
+            SizedBox(width: 300, child: DropdownButtonFormField<String>(
+              isExpanded: true,
               initialValue: _status,
               decoration: const InputDecoration(labelText: 'Situação fiscal', prefixIcon: Icon(Icons.filter_alt_outlined)),
               items: [const DropdownMenuItem(value: '', child: Text('Todas as situações')),
