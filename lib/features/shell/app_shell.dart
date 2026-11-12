@@ -58,13 +58,14 @@ class AppShell extends StatelessWidget {
     return Scaffold(
       body: Row(
         children: [
-          Container(
-            width: 264,
-            decoration: const BoxDecoration(
-              color: AppColors.sidebar,
-              border: Border(right: BorderSide(color: AppColors.border)),
-            ),
-            child: SafeArea(
+          Material(
+            color: AppColors.sidebar,
+            child: Container(
+              width: 264,
+              decoration: const BoxDecoration(
+                border: Border(right: BorderSide(color: AppColors.border)),
+              ),
+              child: SafeArea(
               child: Column(
                 children: [
                   const Padding(
@@ -74,6 +75,7 @@ class AppShell extends StatelessWidget {
                   const Divider(height: 1),
                   Expanded(child: _Menu(items: _items)),
                 ],
+              ),
               ),
             ),
           ),
