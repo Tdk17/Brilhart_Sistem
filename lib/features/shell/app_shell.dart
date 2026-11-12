@@ -58,10 +58,10 @@ class AppShell extends StatelessWidget {
       body: Row(
         children: [
           Container(
-            width: 248,
+            width: 264,
             decoration: const BoxDecoration(
               color: AppColors.surface,
-              border: Border(right: BorderSide(color: Colors.white10)),
+              border: Border(right: BorderSide(color: AppColors.border)),
             ),
             child: SafeArea(
               child: Column(
@@ -128,7 +128,7 @@ class _BrandHeaderState extends State<_BrandHeader> {
           height: logoSize,
           padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
-            color: Colors.black,
+            color: AppColors.black,
             borderRadius: BorderRadius.circular(14),
             border: Border.all(color: AppColors.gold.withValues(alpha: .35)),
           ),
@@ -221,7 +221,7 @@ class _Menu extends StatelessWidget {
               final selected = location == item.path;
 
               return Material(
-                color: selected ? AppColors.gold : Colors.transparent,
+                color: selected ? AppColors.gold.withValues(alpha: .18) : Colors.transparent,
                 borderRadius: BorderRadius.circular(12),
                 child: ListTile(
                   minTileHeight: 46,
@@ -231,12 +231,12 @@ class _Menu extends StatelessWidget {
                   leading: Icon(
                     item.icon,
                     size: 20,
-                    color: selected ? AppColors.black : AppColors.silver,
+                    color: selected ? AppColors.goldSoft : AppColors.silver,
                   ),
                   title: Text(
                     item.label,
                     style: TextStyle(
-                      color: selected ? AppColors.black : AppColors.silver,
+                      color: selected ? AppColors.goldSoft : AppColors.silver,
                       fontSize: 14,
                       fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
                     ),
